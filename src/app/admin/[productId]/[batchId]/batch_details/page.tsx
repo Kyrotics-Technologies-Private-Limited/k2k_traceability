@@ -22,7 +22,7 @@ import {
   Download,
   Beaker,
   FlaskConical,
-  Layers
+  Layers,
 } from "lucide-react";
 import {
   fetchBatchDetails,
@@ -131,8 +131,8 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
   const sortedPacketDetails = useMemo(() => {
     return [...packetDetails].sort((a, b) => {
       if (!sortKey) return 0;
-      let aValue: any;
-      let bValue: any;
+      let aValue: string;
+      let bValue: string;
 
       if (sortKey === "serialNo") {
         aValue = a.serialNo?.toLowerCase() || "";
@@ -157,8 +157,13 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Batch Details");
-    const excelBuffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
-    const dataBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    const excelBuffer = XLSX.write(workbook, {
+      type: "array",
+      bookType: "xlsx",
+    });
+    const dataBlob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
     const url = window.URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
     link.href = url;
@@ -170,7 +175,7 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
   return (
     <div className="min-h-screen bg-[url('/grid.svg')] bg-fixed bg-green-50/90 dark:bg-green-950/90">
       <div className="absolute inset-0 bg-gradient-to-b from-green-50/90 to-green-100/90 dark:from-green-950/90 dark:to-green-900/90" />
-      
+
       <div className="relative container mx-auto px-4 py-8 space-y-6">
         {/* Header Section */}
         <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-0">
@@ -189,7 +194,7 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -220,7 +225,9 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
                   <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Quantity</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Total Quantity
+                  </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     {batchDetails?.quantity || 0}
                   </p>
@@ -236,7 +243,9 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
                   <Beaker className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Limit Quantity</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Limit Quantity
+                  </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     {batchDetails?.limitQuantity || 0}
                   </p>
@@ -262,13 +271,12 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
                     >
                       <div className="flex items-center gap-2">
                         Serial Number
-                        {sortKey === "serialNo" && (
-                          sortDirection === "asc" ? (
+                        {sortKey === "serialNo" &&
+                          (sortDirection === "asc" ? (
                             <ArrowUp className="w-4 h-4" />
                           ) : (
                             <ArrowDown className="w-4 h-4" />
-                          )
-                        )}
+                          ))}
                       </div>
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -375,7 +383,10 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setOpenGeneratePacket(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setOpenGeneratePacket(false)}
+              >
                 Cancel
               </Button>
               <Button

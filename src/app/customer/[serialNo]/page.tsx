@@ -1,15 +1,14 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { fetchCustomerDetails } from "../../../../firebase/firebaseUtil";
 import { useRouter } from "next/navigation";
-import { 
-  ArrowLeft, 
-  Beaker, 
-  FileText, 
-  PackageCheck, 
-  ShieldCheck 
+import {
+  ArrowLeft,
+  Beaker,
+  FileText,
+  PackageCheck,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,7 +30,9 @@ interface PacketDetails {
 }
 
 const SearchResult = ({ params }: { params: { serialNo: string } }) => {
-  const [packetDetails, setPacketDetails] = useState<PacketDetails | null>(null);
+  const [packetDetails, setPacketDetails] = useState<PacketDetails | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
   const { serialNo } = params;
@@ -79,7 +80,7 @@ const SearchResult = ({ params }: { params: { serialNo: string } }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-950 py-10 px-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-6xl mx-auto"
@@ -99,8 +100,8 @@ const SearchResult = ({ params }: { params: { serialNo: string } }) => {
             <Card className="overflow-hidden">
               <div className="relative group">
                 <Image
-                  src={packetDetails?.productImage!}
-                  alt={packetDetails?.productName!}
+                  src={packetDetails?.productImage || ""}
+                  alt={packetDetails?.productName || "Product Image"}
                   className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute top-4 right-4">
@@ -154,20 +155,32 @@ const SearchResult = ({ params }: { params: { serialNo: string } }) => {
 
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Batch Number</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Batch Number
+                      </p>
                       <p className="font-semibold">{packetDetails?.batchNo}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Serial Number</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Serial Number
+                      </p>
                       <p className="font-semibold">{serialNo}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Manufacturing Date</p>
-                      <p className="font-semibold">{packetDetails?.manufacturingDate || "01/01/2024"}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Manufacturing Date
+                      </p>
+                      <p className="font-semibold">
+                        {packetDetails?.manufacturingDate || "01/01/2024"}
+                      </p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Expiry Date</p>
-                      <p className="font-semibold">{packetDetails?.expiryDate || "01/01/2025"}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Expiry Date
+                      </p>
+                      <p className="font-semibold">
+                        {packetDetails?.expiryDate || "01/01/2025"}
+                      </p>
                     </div>
                   </div>
 
@@ -175,7 +188,9 @@ const SearchResult = ({ params }: { params: { serialNo: string } }) => {
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center">
                         <Beaker className="w-5 h-5 text-green-600 mr-2" />
-                        <span className="font-medium">Refractometer Report</span>
+                        <span className="font-medium">
+                          Refractometer Report
+                        </span>
                       </div>
                       <Badge variant="outline">
                         {packetDetails?.refractometerReport || "98% Pure"}
@@ -183,9 +198,11 @@ const SearchResult = ({ params }: { params: { serialNo: string } }) => {
                     </div>
 
                     {packetDetails?.testReport && (
-                      <Button 
+                      <Button
                         className="w-full bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => window.open(packetDetails.testReport, '_blank')}
+                        onClick={() =>
+                          window.open(packetDetails.testReport, "_blank")
+                        }
                       >
                         <FileText className="w-4 h-4 mr-2" />
                         View Laboratory Test Report
@@ -199,9 +216,12 @@ const SearchResult = ({ params }: { params: { serialNo: string } }) => {
             {/* Additional Information */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Storage Instructions</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Storage Instructions
+                </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Store in a cool, dry place away from direct sunlight. Keep container tightly sealed when not in use.
+                  Store in a cool, dry place away from direct sunlight. Keep
+                  container tightly sealed when not in use.
                 </p>
               </CardContent>
             </Card>

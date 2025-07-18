@@ -2,12 +2,22 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Package, Layers, Upload } from "lucide-react";
-import { fetchProductByProductId, addBatchToProduct, fetchBatchesByProductId } from "../../../../../firebase/firebaseUtil";
+import {
+  fetchProductByProductId,
+  addBatchToProduct,
+  fetchBatchesByProductId,
+} from "../../../../../firebase/firebaseUtil";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -27,7 +37,9 @@ interface ProductDetails {
 const BatchesPage: React.FC<Props> = ({ params }) => {
   const [open, setOpen] = useState(false);
   const [batches, setBatches] = useState<any[]>([]);
-  const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
+  const [productDetails, setProductDetails] = useState<ProductDetails | null>(
+    null
+  );
   const [quantity, setQuantity] = useState("");
   const [testReport, setTestReport] = useState<File | null>(null);
   const [batchNo, setBatchNo] = useState("");
@@ -49,7 +61,8 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
 
   const handleDialogOpen = () => {
     if (batches.length > 0) {
-      const lastBatchNo = Math.max(...batches.map(batch => parseInt(batch.batchNo, 10))) || 0;
+      const lastBatchNo =
+        Math.max(...batches.map((batch) => parseInt(batch.batchNo, 10))) || 0;
       setBatchNo((lastBatchNo + 1).toString().padStart(3, "0"));
     } else {
       setBatchNo("001");
@@ -58,7 +71,11 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   };
 
   const handleCreateBatch = async () => {
-    const newBatchId = await addBatchToProduct(productId, Number(quantity), testReport);
+    const newBatchId = await addBatchToProduct(
+      productId,
+      Number(quantity),
+      testReport
+    );
     setBatches([...batches, { id: newBatchId, batchNo, quantity }]);
     setQuantity("");
     setTestReport(null);
@@ -85,7 +102,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     const file = e.dataTransfer.files?.[0];
     if (file) {
       setTestReport(file);
@@ -95,7 +112,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   return (
     <div className="min-h-screen bg-[url('/grid.svg')] bg-fixed bg-green-50/90 dark:bg-green-950/90">
       <div className="absolute inset-0 bg-gradient-to-b from-green-50/90 to-green-100/90 dark:from-green-950/90 dark:to-green-900/90" />
-      
+
       <div className="relative container mx-auto px-4 py-8">
         <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-0 mb-8">
           <CardContent className="p-6">
@@ -107,6 +124,8 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                     <Image
                       src={productDetails.productImage}
                       alt={productDetails.productName || "Product Image"}
+                      width={400}
+                      height={400}
                       className="w-full aspect-square object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
@@ -119,7 +138,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                   </Badge>
                 </div>
 
-                <Button 
+                <Button
                   onClick={handleDialogOpen}
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
                 >
@@ -145,13 +164,18 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {batches.map((batch, index) => (
-                      <Link href={`/admin/${productId}/${batch.id}/batch_details`} key={index}>
+                      <Link
+                        href={`/admin/${productId}/${batch.id}/batch_details`}
+                        key={index}
+                      >
                         <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200 border-0">
                           <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                               <div>
                                 <p className="font-semibold text-gray-900 dark:text-gray-50">
-                                  Batch {batch.batchNo || `${index + 1}`.padStart(3, "0")}
+                                  Batch{" "}
+                                  {batch.batchNo ||
+                                    `${index + 1}`.padStart(3, "0")}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                   Quantity: {batch.quantity || "N/A"}
@@ -179,10 +203,13 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
               Add New Batch
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-6 py-4">
             <div className="space-y-2">
-              <label htmlFor="quantity" className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              <label
+                htmlFor="quantity"
+                className="text-sm font-medium text-gray-900 dark:text-gray-100"
+              >
                 Maximum Batch Size
               </label>
               <Input
@@ -201,7 +228,9 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
               </label>
               <div
                 className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
-                  dragActive ? "border-green-500 bg-green-50/50" : "border-gray-200 dark:border-gray-700"
+                  dragActive
+                    ? "border-green-500 bg-green-50/50"
+                    : "border-gray-200 dark:border-gray-700"
                 } relative`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -216,7 +245,10 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                 <div className="text-center">
                   <Upload className="mx-auto h-12 w-12 text-gray-400" />
                   <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    <span className="font-semibold text-green-600">Click to upload</span> or drag and drop
+                    <span className="font-semibold text-green-600">
+                      Click to upload
+                    </span>{" "}
+                    or drag and drop
                   </p>
                   <p className="text-xs text-gray-500">PDF or DOC up to 10MB</p>
                 </div>
@@ -224,7 +256,10 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="batch-no" className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              <label
+                htmlFor="batch-no"
+                className="text-sm font-medium text-gray-900 dark:text-gray-100"
+              >
                 Generated Batch Number
               </label>
               <Input
@@ -240,7 +275,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleCreateBatch}
               className="bg-green-600 hover:bg-green-700 text-white"
             >

@@ -1,22 +1,38 @@
-
-
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { fetchProductCategories, addProduct } from '../../../../firebase/firebaseUtil'; // Adjust path as needed
+import {
+  fetchProductCategories,
+  addProduct,
+} from "../../../../firebase/firebaseUtil"; // Adjust path as needed
 import Image from "next/image";
+
+interface ProductCategory {
+  id: string;
+  productName?: string;
+  productDetails?: string;
+  productImage?: string;
+}
 
 export default function ProductPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [productName, setProductName] = useState("");
   const [productDetails, setProductDetails] = useState("");
   const [productImage, setProductImage] = useState<File | null>(null);
-  const [productCategories, setProductCategories] = useState<any[]>([]);  // Hold fetched categories
-  const [loading, setLoading] = useState(false);  // For submit button loading state
-  const [error, setError] = useState<string | null>(null);  // Error handling
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>(
+    []
+  ); // Hold fetched categories
+  const [loading, setLoading] = useState(false); // For submit button loading state
+  const [error, setError] = useState<string | null>(null); // Error handling
 
   useEffect(() => {
     // Fetch product categories when the component mounts
@@ -35,10 +51,14 @@ export default function ProductPage() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    setError(null);  // Reset error before submission
+    setError(null); // Reset error before submission
     try {
       // Call the addProduct function and pass necessary data
-      const result = await addProduct(productName, productDetails, productImage);
+      const result = await addProduct(
+        productName,
+        productDetails,
+        productImage
+      );
       if (result.success) {
         // Reload categories after successful addition
         const categories = await fetchProductCategories();
@@ -48,7 +68,7 @@ export default function ProductPage() {
         setProductDetails("");
         setProductImage(null);
       } else {
-        setError(result.message);  // Show error message
+        setError(result.message); // Show error message
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -59,11 +79,10 @@ export default function ProductPage() {
 
   return (
     <div className="h-[calc(100vh-100px)] w-full flex flex-col items-center">
-      <div className="grid grid-cols-4 gap-4" >
-        
+      <div className="grid grid-cols-4 gap-4">
         {productCategories.map((category, index) => (
           <Link
-            href = '/admin/create_batch'
+            href="/admin/create_batch"
             key={index}
             className="w-48 h-48 bg-slate-300 flex flex-col items-center justify-center text-black rounded-md shadow-md"
           >
@@ -72,7 +91,9 @@ export default function ProductPage() {
             {category.productImage && (
               <Image
                 src={category.productImage}
-                alt={category.productName}
+                alt={category.productName || "Product Image"}
+                width={100}
+                height={100}
                 className="w-32 h-32 object-cover mt-2"
               />
             )}
@@ -106,11 +127,7 @@ export default function ProductPage() {
               placeholder="Enter product details"
               className="mb-4"
             />
-            <Input
-              type="file"
-              onChange={handleFileChange}
-              className="mb-4"
-            />
+            <Input type="file" onChange={handleFileChange} className="mb-4" />
             {error && <p className="text-red-500">{error}</p>}
           </div>
           <DialogFooter>
