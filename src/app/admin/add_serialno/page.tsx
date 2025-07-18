@@ -19,7 +19,7 @@ export default function AddSerialNumber() {
       setMessage("Serial number added successfully!");
       setBatchNumber("");
       setSerialNumber("");
-    } catch (error) {
+    } catch {
       setMessage("Error adding serial number. Please try again.");
     }
   };

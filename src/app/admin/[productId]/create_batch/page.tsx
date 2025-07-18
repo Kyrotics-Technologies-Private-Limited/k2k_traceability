@@ -34,9 +34,15 @@ interface ProductDetails {
   productImage?: string;
 }
 
+interface Batch {
+  id: string;
+  batchNo?: string;
+  quantity?: number;
+}
+
 const BatchesPage: React.FC<Props> = ({ params }) => {
   const [open, setOpen] = useState(false);
-  const [batches, setBatches] = useState<any[]>([]);
+  const [batches, setBatches] = useState<Batch[]>([]);
   const [productDetails, setProductDetails] = useState<ProductDetails | null>(
     null
   );
@@ -62,7 +68,9 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   const handleDialogOpen = () => {
     if (batches.length > 0) {
       const lastBatchNo =
-        Math.max(...batches.map((batch) => parseInt(batch.batchNo, 10))) || 0;
+        Math.max(
+          ...batches.map((batch) => parseInt(batch.batchNo || "0", 10))
+        ) || 0;
       setBatchNo((lastBatchNo + 1).toString().padStart(3, "0"));
     } else {
       setBatchNo("001");
@@ -76,10 +84,19 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
       Number(quantity),
       testReport
     );
-    setBatches([...batches, { id: newBatchId, batchNo, quantity }]);
-    setQuantity("");
-    setTestReport(null);
-    setOpen(false);
+    // Handle the case where newBatchId might be an object with success/message
+    if (typeof newBatchId === "string") {
+      setBatches([
+        ...batches,
+        { id: newBatchId, batchNo, quantity: Number(quantity) },
+      ]);
+      setQuantity("");
+      setTestReport(null);
+      setOpen(false);
+    } else {
+      // Handle error case
+      console.error("Failed to create batch:", newBatchId.message);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

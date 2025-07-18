@@ -1,20 +1,22 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchExistingPackets, updateRefractometerReport } from "../../../../../../firebase/firebaseUtil";
+import {
+  fetchExistingPackets,
+  updateRefractometerReport,
+} from "../../../../../../firebase/firebaseUtil";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-// interface Packet {
-//   id: string;
-//   serialNo: string;
-//   refractometerReport: string;
-//   packetNo: string;
-//   productNo: string;
-//   batchNo: string;
-// }
+interface Packet {
+  id: string;
+  serialNo: string;
+  refractometerReport: string;
+  packetNo: string;
+  productNo?: string;
+  batchNo?: string;
+}
 
 interface Props {
   params: {
@@ -24,7 +26,7 @@ interface Props {
 }
 
 const AddRefractometerReport: React.FC<Props> = ({ params }) => {
-  const [serialNumbers, setSerialNumbers] = useState<any[]>([]);
+  const [serialNumbers, setSerialNumbers] = useState<Packet[]>([]);
   const [packetNo, setPacketNo] = useState("");
   const [refractometerReport, setRefractometerReport] = useState("");
   const router = useRouter();
@@ -50,12 +52,13 @@ const AddRefractometerReport: React.FC<Props> = ({ params }) => {
 
     // Find the packet based on the serial number format
     const selectedPacket = serialNumbers.find(
-      (packet) => packet.serialNo === `${packet.productNo}${packet.batchNo}${packetNo}`
+      (packet) =>
+        packet.serialNo === `${packet.productNo}${packet.batchNo}${packetNo}`
     );
 
     if (!selectedPacket) {
       // console.log('Invalid packet number. Serial number does not exist.')
-      
+
       toast.error("Invalid packet number or already exists ");
       return;
     }
@@ -69,12 +72,19 @@ const AddRefractometerReport: React.FC<Props> = ({ params }) => {
 
     try {
       // Proceed with adding the refractometer report
-      await updateRefractometerReport(productId, batchId, selectedPacket.serialNo, refractometerReport);
+      await updateRefractometerReport(
+        productId,
+        batchId,
+        selectedPacket.serialNo,
+        refractometerReport
+      );
       // console.log('updated')
       toast.success("Refractometer report added successfully!");
 
       // Remove the updated packet from the list
-      const remainingPackets = serialNumbers.filter(packet => packet.serialNo !== selectedPacket.serialNo);
+      const remainingPackets = serialNumbers.filter(
+        (packet) => packet.serialNo !== selectedPacket.serialNo
+      );
       setSerialNumbers(remainingPackets);
       setPacketNo("");
       setRefractometerReport("");
@@ -83,7 +93,7 @@ const AddRefractometerReport: React.FC<Props> = ({ params }) => {
         router.push(`/admin/${productId}/${batchId}/batch_details`);
       }
     } catch (error) {
-      console.log('error',error)
+      console.log("error", error);
       console.error("Error adding refractometer report:", error);
       toast.error("Error adding refractometer report. Please try again.");
     }
@@ -97,7 +107,9 @@ const AddRefractometerReport: React.FC<Props> = ({ params }) => {
         </h1>
         <Button
           className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={() => router.push(`/admin/${productId}/${batchId}/batch_details`)}
+          onClick={() =>
+            router.push(`/admin/${productId}/${batchId}/batch_details`)
+          }
         >
           Back to Batch Details
         </Button>
@@ -137,36 +149,35 @@ const AddRefractometerReport: React.FC<Props> = ({ params }) => {
               />
             </div> */}
 
-<div className="mb-4">
-  <label className="block mb-2">Serial Number</label>
-  <div className="flex space-x-2">
-    {/* Product Number (Read-only) */}
-    <input
-      type="text"
-      className="w-1/3 p-2 border rounded bg-gray-100"
-      value={serialNumbers[0].productNo}
-      readOnly
-    />
-    
-    {/* Batch Number (Read-only) */}
-    <input
-      type="text"
-      className="w-1/3 p-2 border rounded bg-gray-100"
-      value={serialNumbers[0].batchNo}
-      readOnly
-    />
-    
-    {/* Packet Number (Editable) */}
-    <input
-      type="text"
-      className="w-1/3 p-2 border rounded"
-      value={packetNo}
-      onChange={(e) => setPacketNo(e.target.value)}
-      placeholder="Enter last digits"
-    />
-  </div>
-</div>
+            <div className="mb-4">
+              <label className="block mb-2">Serial Number</label>
+              <div className="flex space-x-2">
+                {/* Product Number (Read-only) */}
+                <input
+                  type="text"
+                  className="w-1/3 p-2 border rounded bg-gray-100"
+                  value={serialNumbers[0].productNo}
+                  readOnly
+                />
 
+                {/* Batch Number (Read-only) */}
+                <input
+                  type="text"
+                  className="w-1/3 p-2 border rounded bg-gray-100"
+                  value={serialNumbers[0].batchNo}
+                  readOnly
+                />
+
+                {/* Packet Number (Editable) */}
+                <input
+                  type="text"
+                  className="w-1/3 p-2 border rounded"
+                  value={packetNo}
+                  onChange={(e) => setPacketNo(e.target.value)}
+                  placeholder="Enter last digits"
+                />
+              </div>
+            </div>
 
             <div className="mb-4">
               <label className="block mb-2">Refractometer Report</label>
@@ -179,7 +190,10 @@ const AddRefractometerReport: React.FC<Props> = ({ params }) => {
               />
             </div>
 
-            <Button className="bg-blue-600 text-white hover:bg-blue-700" onClick={handleAddReport}>
+            <Button
+              className="bg-blue-600 text-white hover:bg-blue-700"
+              onClick={handleAddReport}
+            >
               Add Report
             </Button>
           </>
