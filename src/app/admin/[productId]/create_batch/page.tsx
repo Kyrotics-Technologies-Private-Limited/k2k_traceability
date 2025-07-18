@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Package, Layers, Upload } from "lucide-react";
 import { fetchProductByProductId, addBatchToProduct, fetchBatchesByProductId } from "../../../../../firebase/firebaseUtil";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Props {
   params: {
@@ -30,7 +31,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   const [quantity, setQuantity] = useState("");
   const [testReport, setTestReport] = useState<File | null>(null);
   const [batchNo, setBatchNo] = useState("");
-  const [testReportUrl, setTestReportUrl] = useState<string | null>("");
+  // const [testReportUrl, setTestReportUrl] = useState<string | null>("");
   const [dragActive, setDragActive] = useState(false);
 
   const { productId } = params;
@@ -58,7 +59,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
 
   const handleCreateBatch = async () => {
     const newBatchId = await addBatchToProduct(productId, Number(quantity), testReport);
-    setBatches([...batches, { id: newBatchId, batchNo, quantity, testReportUrl }]);
+    setBatches([...batches, { id: newBatchId, batchNo, quantity }]);
     setQuantity("");
     setTestReport(null);
     setOpen(false);
@@ -103,7 +104,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
               <div className="w-full md:w-1/3 space-y-6">
                 <div className="relative group overflow-hidden rounded-xl">
                   {productDetails?.productImage ? (
-                    <img
+                    <Image
                       src={productDetails.productImage}
                       alt={productDetails.productName || "Product Image"}
                       className="w-full aspect-square object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"

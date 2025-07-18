@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { fetchProductCategories, addProduct } from '../../../../firebase/firebaseUtil'; // Adjust path as needed
+import Image from "next/image";
 
 export default function ProductPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -49,7 +50,7 @@ export default function ProductPage() {
       } else {
         setError(result.message);  // Show error message
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -69,7 +70,7 @@ export default function ProductPage() {
             <h3 className="font-bold text-lg">{category.productName}</h3>
             <p className="text-sm">{category.productDetails}</p>
             {category.productImage && (
-              <img
+              <Image
                 src={category.productImage}
                 alt={category.productName}
                 className="w-32 h-32 object-cover mt-2"

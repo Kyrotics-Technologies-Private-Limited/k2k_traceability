@@ -16,6 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import { Skeleton } from "../../../components/ui/skeleton";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface PacketDetails {
   productName: string;
@@ -97,9 +98,9 @@ const SearchResult = ({ params }: { params: { serialNo: string } }) => {
           <div className="space-y-6">
             <Card className="overflow-hidden">
               <div className="relative group">
-                <img
-                  src={packetDetails?.productImage}
-                  alt={packetDetails?.productName}
+                <Image
+                  src={packetDetails?.productImage!}
+                  alt={packetDetails?.productName!}
                   className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute top-4 right-4">

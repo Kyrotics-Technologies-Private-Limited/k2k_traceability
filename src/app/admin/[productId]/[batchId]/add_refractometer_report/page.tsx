@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-interface Packet {
-  id: string;
-  serialNo: string;
-  refractometerReport: string;
-  packetNo: string;
-  productNo: string;
-  batchNo: string;
-}
+// interface Packet {
+//   id: string;
+//   serialNo: string;
+//   refractometerReport: string;
+//   packetNo: string;
+//   productNo: string;
+//   batchNo: string;
+// }
 
 interface Props {
   params: {
