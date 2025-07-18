@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Package, Layers, Upload } from "lucide-react";
 import { fetchProductByProductId, addBatchToProduct, fetchBatchesByProductId } from "../../../../../firebase/firebaseUtil";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 interface Props {
   params: {
