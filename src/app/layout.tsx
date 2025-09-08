@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Link from 'next/link';
 import { Toaster } from "react-hot-toast"; // Import Toaster
+import { AuthProvider } from '@/contexts/AuthContext';
+import Navbar from '../components/Navbar';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,29 +32,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="bg-gray-100 ">
+        <AuthProvider>
+          <div className="bg-gray-100 ">
           {/* Navigation Bar */}
-          <nav className="bg-white shadow-sm fixed w-full z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between h-16">
-                <div className="flex">
-                  <div className="flex-shrink-0 flex items-center">
-                    <Link href="/" className="text-xl font-bold text-gray-800">
-                      Kishan2Kitchen
-                    </Link>
-                  </div>
-                </div>
-                <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                  <Link href="/admin" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                    Admin Panel
-                  </Link>
-                  <Link href="/customer" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                    Customer Search
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </nav>
+          <Navbar />
 
           {/* Main Content */}
           <main className="w-full mx-auto pt-10 sm:px-0 lg:px-0 overflow-y-hidden">
@@ -61,9 +44,9 @@ export default function RootLayout({
           </main>
         </div>
 
-        {/* Toaster for notifications */}
-        <Toaster position="top-right" reverseOrder={false} /> {/* Toaster placed here */}
-
+          {/* Toaster for notifications */}
+          <Toaster position="top-right" reverseOrder={false} /> {/* Toaster placed here */}
+        </AuthProvider>
       </body>
     </html>
   );

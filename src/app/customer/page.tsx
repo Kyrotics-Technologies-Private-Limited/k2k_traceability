@@ -1,17 +1,51 @@
 
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Leaf, Search, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
+import toast from "react-hot-toast";
 
 const CustomerSearch = () => {
   const [serialNo, setSerialNo] = useState<string>("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { setUserFromToken, user, userRole, loading } = useAuth();
+  const token = searchParams.get("token");
+
+  // Handle token-based authentication
+  useEffect(() => {
+    if (token && !user) {
+      setUserFromToken(token).catch((error) => {
+        console.error("Token verification failed:", error);
+        toast.error("Invalid token. Please try again.");
+        router.push("/login");
+      });
+    }
+  }, [token, user, setUserFromToken, router]);
+
+  // Show loading while verifying token
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If no token and no user, redirect to login
+  if (!token && !user) {
+    router.push("/login");
+    return null;
+  }
 
   const handleSearch = () => {
     if (serialNo.trim() === "") {

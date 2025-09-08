@@ -28,23 +28,17 @@ export default function Home() {
         {/* Call to Actions */}
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-6">
           <Link
-            href="/customer"
+            href="/login"
             className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition"
           >
-            Track Your Order
+            Get Started
           </Link>
           <Link
-            href="/admin"
+            href="/login"
             className="border border-green-600 text-green-700 px-6 py-3 rounded-full hover:bg-green-100 transition"
           >
-            Admin Dashboard
+            Login
           </Link>
-          {/* <Link
-            href="/farmer"
-            className="border border-gray-300 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-100 transition"
-          >
-            Farmer Login
-          </Link> */}
         </div>
 
         {/* Stats / Benefits */}

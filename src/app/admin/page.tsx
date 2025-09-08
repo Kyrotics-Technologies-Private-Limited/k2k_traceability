@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +17,8 @@ import {
   addProduct,
 } from "../../../firebase/firebaseUtil"; // Adjust path as needed
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
+import toast from "react-hot-toast";
 
 interface ProductCategory {
   id: string;
@@ -34,6 +37,36 @@ export default function AdminPanel() {
   ); // Hold fetched categories
   const [loading, setLoading] = useState(false); // For submit button loading state
   const [error, setError] = useState<string | null>(null); // Error handling
+  
+  const { user, userRole, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  // Check authentication
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user || userRole !== 'admin') {
+        toast.error("Access denied. Admin authentication required.");
+        router.push("/login");
+      }
+    }
+  }, [user, userRole, authLoading, router]);
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verifying admin access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, don't render
+  if (!user || userRole !== 'admin') {
+    return null;
+  }
 
   useEffect(() => {
     // Fetch product categories when the component mounts
@@ -80,6 +113,11 @@ export default function AdminPanel() {
 
   return (
     <div className="h-[calc(100vh-100px)] max-w-7xl pt-10 flex flex-col items-center">
+      {/* Admin Header */}
+      <div className="w-full flex justify-center items-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
+      </div>
+      
       <div className="grid grid-cols-4 gap-4">
         {productCategories.map((category, index) => (
           <Link
