@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, FileText, Package, Layers, Upload } from "lucide-react";
+import { Plus, FileText, Package, Layers, Upload, ArrowLeft } from "lucide-react";
 import {
   fetchProductByProductId,
   addBatchToProduct,
@@ -20,6 +20,7 @@ import {
 } from "../../../../../firebase/firebaseUtil";
 import Link from "next/link";
 import Image from "next/image";
+import Loader from "@/components/Loader";
 
 interface Props {
   params: {
@@ -31,6 +32,7 @@ interface ProductDetails {
   id: string;
   productName?: string;
   productDetails?: string;
+  description?: string;
   productImage?: string;
 }
 
@@ -51,15 +53,21 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   const [batchNo, setBatchNo] = useState("");
   // const [testReportUrl, setTestReportUrl] = useState<string | null>("");
   const [dragActive, setDragActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { productId } = params;
 
   useEffect(() => {
     const fetchData = async () => {
-      const product = await fetchProductByProductId(productId);
-      setProductDetails(product);
-      const fetchedBatches = await fetchBatchesByProductId(productId);
-      setBatches(fetchedBatches);
+      try {
+        setIsLoading(true);
+        const product = await fetchProductByProductId(productId);
+        setProductDetails(product);
+        const fetchedBatches = await fetchBatchesByProductId(productId);
+        setBatches(fetchedBatches);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
@@ -126,18 +134,27 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
     }
   };
 
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
     <div className="min-h-screen bg-[url('/grid.svg')] bg-fixed bg-green-50/90 dark:bg-green-950/90">
       <div className="absolute inset-0 bg-gradient-to-b from-green-50/90 to-green-100/90 dark:from-green-950/90 dark:to-green-900/90" />
 
       <div className="relative container mx-auto px-4 py-8">
+        <Link href="/admin">
+          <Button variant="ghost" className="mb-4 text-gray-600 hover:text-green-600">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Admin Panel
+          </Button>
+        </Link>
         <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-0 mb-8">
           <CardContent className="p-6">
             <div className="flex flex-wrap md:flex-nowrap gap-8">
               {/* Left Section: Product Image */}
               <div className="w-full md:w-1/3 space-y-6">
-                <div className="relative group overflow-hidden rounded-xl">
-                  {productDetails?.productImage ? (
+                <div className="relative group overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
+                  {productDetails?.productImage && typeof productDetails.productImage === 'string' && productDetails.productImage.startsWith('http') ? (
                     <Image
                       src={productDetails.productImage}
                       alt={productDetails.productName || "Product Image"}
@@ -146,8 +163,9 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                       className="w-full aspect-square object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full aspect-square bg-gray-200 dark:bg-gray-800 flex items-center justify-center rounded-xl">
-                      <Package className="w-12 h-12 text-gray-400" />
+                    <div className="w-full aspect-square flex flex-col items-center justify-center rounded-xl text-gray-400">
+                      <Package className="w-12 h-12 mb-2" />
+                      <span className="text-sm font-medium">No Product Image</span>
                     </div>
                   )}
                   <Badge className="absolute top-4 right-4 bg-green-600/90 backdrop-blur-sm">
@@ -169,7 +187,12 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
                     {productDetails?.productName || "Product Name"}
                   </h1>
-                  <p className="mt-4 text-gray-600 dark:text-gray-300">
+                  {productDetails?.description && (
+                    <p className="mt-2 text-gray-700 dark:text-gray-300 italic">
+                      {productDetails.description}
+                    </p>
+                  )}
+                  <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm">
                     {productDetails?.productDetails || "Product Details"}
                   </p>
                 </div>

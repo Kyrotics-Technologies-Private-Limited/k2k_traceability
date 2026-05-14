@@ -48,11 +48,12 @@ const CustomerSearch = () => {
   }
 
   const handleSearch = () => {
-    if (serialNo.trim() === "") {
+    const trimmedSerialNo = serialNo.trim();
+    if (trimmedSerialNo === "") {
       alert("Please enter a serial number.");
       return;
     }
-    router.push(`/customer/${serialNo}`);
+    router.push(`/customer/${trimmedSerialNo}`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

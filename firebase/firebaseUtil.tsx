@@ -8,14 +8,16 @@ import {
   where,
   orderBy,
   updateDoc,
-  setDoc
+  setDoc,
+  doc,
+  getDoc,
+  deleteDoc,
+  writeBatch
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { initializeApp } from "firebase/app";
 import { v4 as uuidv4 } from "uuid";
 import { app, db, storage } from "./firebaseConfig";
-
-import { doc, getDoc } from "firebase/firestore";
 
 interface Packet {
   id: string;
@@ -30,10 +32,20 @@ interface Batch {
   batchNo: string;
 }
 
+export interface ProductCategory {
+  id: string;
+  productCategoryId: string;
+  productName: string;
+  productDetails: string;
+  description: string;
+  productImage: string;
+}
+
 // Function to add a new product
 export const addProduct = async (
   productName: string,
   productDetails: string,
+  description: string,
   productImage: File | null
 ) => {
   try {
@@ -68,15 +80,30 @@ export const addProduct = async (
     }
 
     // Step 3: Add product details to Firestore
-    const product = await addDoc(productCategoryRef, {
+    const productData = {
       productCategoryId: newProductCategoryId,
       productName,
       productDetails,
+      description,
       productImage: imageUrl,
+    };
+
+    const product = await addDoc(productCategoryRef, productData);
+    
+    // Also store in the 'products' collection as requested
+    await setDoc(doc(db, "products", product.id), {
+      ...productData,
+      id: product.id
     });
+
     console.log(product);
 
-    return { success: true, message: "Product added successfully" };
+    return { 
+      success: true, 
+      message: "Product added successfully", 
+      id: product.id, 
+      productCategoryId: newProductCategoryId 
+    };
   } catch (error) {
     console.error("Error adding product: ", error);
     if (error instanceof Error) {
@@ -86,8 +113,57 @@ export const addProduct = async (
   }
 };
 
+// Function to update an existing product
+export const updateProduct = async (
+  productId: string,
+  productName: string,
+  productDetails: string,
+  description: string,
+  productImage: File | string | null
+) => {
+  try {
+    let imageUrl = typeof productImage === 'string' ? productImage : "";
+
+    // If a new image file is provided, upload it
+    if (productImage instanceof File) {
+      const storageRef = ref(
+        storage,
+        `products/${uuidv4()}-${productImage.name}`
+      );
+      const snapshot = await uploadBytes(storageRef, productImage);
+      imageUrl = await getDownloadURL(snapshot.ref);
+    }
+
+    const updateData: any = {
+      productName,
+      productDetails,
+      description,
+      productImage: imageUrl,
+    };
+
+    // Update in productCategory collection
+    const productRef = doc(db, "productCategory", productId);
+    await updateDoc(productRef, updateData);
+
+    // Also update in the 'products' collection for synchronization
+    const globalProductRef = doc(db, "products", productId);
+    await setDoc(globalProductRef, {
+      ...updateData,
+      id: productId
+    }, { merge: true });
+
+    return { success: true, message: "Product updated successfully" };
+  } catch (error) {
+    console.error("Error updating product: ", error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : "An unknown error occurred" 
+    };
+  }
+};
+
 // Function to fetch product categories
-export const fetchProductCategories = async () => {
+export const fetchProductCategories = async (): Promise<ProductCategory[]> => {
   try {
     const productCategoryRef = collection(db, "productCategory");
     const productSnapshot = await getDocs(productCategoryRef);
@@ -95,7 +171,7 @@ export const fetchProductCategories = async () => {
     const productCategories = productSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    }));
+    } as ProductCategory));
 
     return productCategories;
   } catch (error) {
@@ -104,7 +180,7 @@ export const fetchProductCategories = async () => {
   }
 };
 
-export const fetchProductByProductId = async (productId: string) => {
+export const fetchProductByProductId = async (productId: string): Promise<ProductCategory | null> => {
   try {
     // Reference to the specific product document by productId
     const productDocRef = doc(db, "productCategory", productId);
@@ -120,7 +196,7 @@ export const fetchProductByProductId = async (productId: string) => {
     return {
       id: productSnapshot.id,
       ...productSnapshot.data(),
-    };
+    } as ProductCategory;
   } catch (error) {
     console.error("Error fetching product by product ID: ", error);
     return null;
@@ -197,6 +273,34 @@ export const addBatchToProduct = async (
   }
 };
 
+export const updateBatchTestReport = async (
+  productId: string,
+  batchId: string,
+  testReport: File
+) => {
+  try {
+    const batchDocRef = doc(db, `productCategory/${productId}/batches/${batchId}`);
+
+    // Upload to Firebase Storage
+    const storageRef = ref(storage, `testReport/${uuidv4()}-${testReport.name}`);
+    const snapshot = await uploadBytes(storageRef, testReport);
+    const reportUrl = await getDownloadURL(snapshot.ref);
+
+    // Update the batch document
+    await updateDoc(batchDocRef, {
+      testReport: reportUrl,
+    });
+
+    return { success: true, reportUrl };
+  } catch (error) {
+    console.error("Error updating batch test report: ", error);
+    if (error instanceof Error) {
+      return { success: false, message: error.message };
+    }
+    return { success: false, message: "An unknown error occurred" };
+  }
+};
+
 export const fetchBatchDetails = async (productId: string, batchId: string) => {
   try {
     // Reference to the specific batch document
@@ -239,11 +343,24 @@ export const fetchPacketDetails = async (
     // Fetch all documents from the packets subcollection
     const packetSnapshot = await getDocs(packetsRef);
 
+    // Fetch product data to fix potential undefined serial numbers
+    const productCategoryRef = doc(collection(db, "productCategory"), productId);
+    const productDoc = await getDoc(productCategoryRef);
+    const productNo = productDoc.data()?.productCategoryId || "";
+
     // Map over the packet documents and return their data
-    const packets = packetSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const packets = packetSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      let serialNo = data.serialNo;
+      if (serialNo?.startsWith("undefined")) {
+        serialNo = serialNo.replace("undefined", productNo);
+      }
+      return {
+        id: doc.id,
+        ...data,
+        serialNo,
+      };
+    });
 
     return packets; // Return the array of packet objects
   } catch (error) {
@@ -265,7 +382,7 @@ export const addPacketToBatch = async (
     );
     const productDoc = await getDoc(productCategoryRef);
     const productData = productDoc.data();
-    const productNo = productData?.productCategoryId;
+    const productNo = productData?.productCategoryId || "";
 
     //batchNo
     const batchCategoryRef = doc(
@@ -277,6 +394,10 @@ export const addPacketToBatch = async (
     const batchDoc = await getDoc(batchCategoryRef);
     const batchData = batchDoc.data();
     const batchNo = batchData?.batchNo;
+    
+    if (!productNo || !batchNo) {
+      throw new Error(`Missing product category ID (${productNo}) or batch number (${batchNo})`);
+    }
     
     // Step 3: Get current quantity from batch
     let currentQuantity = batchData?.quantity || 0;
@@ -346,7 +467,7 @@ export const generatePackets = async (
     const productCategoryRef = doc(collection(db, "productCategory"), productId);
     const productDoc = await getDoc(productCategoryRef);
     const productData = productDoc.data();
-    const productNo = productData?.productCategoryId;
+    const productNo = productData?.productCategoryId || "";
 
     // Step 2: Fetch batch data
     const batchCategoryRef = doc(
@@ -356,6 +477,10 @@ export const generatePackets = async (
     const batchDoc = await getDoc(batchCategoryRef);
     const batchData = batchDoc.data();
     const batchNo = batchData?.batchNo;
+
+    if (!productNo || !batchNo) {
+      throw new Error(`Missing product category ID (${productNo}) or batch number (${batchNo})`);
+    }
 
     // Step 3: Get current quantity from batch
     let currentQuantity = batchData?.quantity || 0;
@@ -474,7 +599,7 @@ export const fetchExistingPackets = async (
     const productCategoryRef = doc(collection(db, "productCategory"), productId);
     const productDoc = await getDoc(productCategoryRef);
     const productData = productDoc.data();
-    const productNo = productData?.productCategoryId;
+    const productNo = productData?.productCategoryId || "";
 
     // Step 2: Fetch batch data
     const batchCategoryRef = doc(
@@ -491,14 +616,21 @@ export const fetchExistingPackets = async (
     const snapshot = await getDocs(q);
 
     // Map through the results and return packets with the correct structure
-    const packets: Packet[] = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      serialNo: doc.data().serialNo,
-      refractometerReport: doc.data().refractometerReport,
-      packetNo: doc.data().packetNo,
-      productNo,
-      batchNo
-    }));
+    const packets: Packet[] = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      let serialNo = data.serialNo;
+      if (serialNo?.startsWith("undefined")) {
+        serialNo = serialNo.replace("undefined", productNo);
+      }
+      return {
+        id: doc.id,
+        serialNo,
+        refractometerReport: data.refractometerReport,
+        packetNo: data.packetNo,
+        productNo,
+        batchNo
+      };
+    });
 
     return packets;
   } catch (error) {
@@ -518,7 +650,7 @@ export const addRefractometerReport = async (
   try {
     const packetRef = doc(
       db,
-      "products",
+      "productCategory",
       productId,
       "batches",
       batchId,
@@ -572,6 +704,74 @@ export const updateRefractometerReport = async (
   }
 };
 
+export const updateRefractometerReportById = async (
+  productId: string,
+  batchId: string,
+  packetId: string,
+  refractometerReport: string
+) => {
+  try {
+    const packetRef = doc(
+      db,
+      `productCategory/${productId}/batches/${batchId}/packets/${packetId}`
+    );
+    
+    const packetSnap = await getDoc(packetRef);
+    if (!packetSnap.exists()) throw new Error("Packet not found");
+    
+    const packetData = packetSnap.data();
+    let currentSerialNo = packetData.serialNo;
+    let newSerialNo = currentSerialNo;
+
+    // Repair serial number if it's broken
+    if (!currentSerialNo || currentSerialNo.startsWith("undefined")) {
+      const productSnap = await getDoc(doc(db, "productCategory", productId));
+      const batchSnap = await getDoc(doc(db, "productCategory", productId, "batches", batchId));
+      
+      const productNo = productSnap.data()?.productCategoryId;
+      const batchNo = batchSnap.data()?.batchNo;
+      const packetNo = packetData.packetNo;
+
+      if (productNo && batchNo && packetNo) {
+        newSerialNo = `${productNo}${batchNo}${packetNo}`;
+        console.log(`Repairing serial number: ${currentSerialNo} -> ${newSerialNo}`);
+      }
+    }
+
+    // Update the packet document
+    const updateData: any = { refractometerReport };
+    if (newSerialNo !== currentSerialNo) {
+      updateData.serialNo = newSerialNo;
+    }
+    
+    await updateDoc(packetRef, updateData);
+
+    // Synchronize with global serialNumbers collection
+    if (newSerialNo) {
+      await setDoc(doc(db, "serialNumbers", newSerialNo), {
+        productCategoryId: productId,
+        batchId,
+        packetId,
+        serialNo: newSerialNo,
+      });
+
+      // If we repaired it, delete the old broken entry if it existed
+      if (currentSerialNo && currentSerialNo !== newSerialNo) {
+        try {
+          await deleteDoc(doc(db, "serialNumbers", currentSerialNo));
+        } catch (e) {
+          console.warn("Could not delete old serial number entry:", e);
+        }
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating refractometer report by ID:", error);
+    throw error;
+  }
+};
+
 
 
 
@@ -609,6 +809,7 @@ export const fetchCustomerDetailsBySerialNo = async (serialNo: string) => {
       product: {
         name: productData?.productName,
         details: productData?.productDetails,
+        description: productData?.description,
         image: productData?.productImage,
       },
       batch: {
@@ -631,9 +832,30 @@ export const fetchCustomerDetailsBySerialNo = async (serialNo: string) => {
 
 export const fetchCustomerDetails = async (serialNo: string) => {
   try {
-    // Query the "serialNumbers" collection to find the packet with the serial number
-    const serialNumbersRef = doc(db, "serialNumbers", serialNo);
-    const serialSnapshot = await getDoc(serialNumbersRef);
+    // 1. Direct Lookup
+    let serialNumbersRef = doc(db, "serialNumbers", serialNo);
+    let serialSnapshot = await getDoc(serialNumbersRef);
+
+    // 2. Fallback for legacy "undefined" prefixed serial numbers
+    if (!serialSnapshot.exists()) {
+      console.log(`Serial ${serialNo} not found, trying fallback...`);
+      const categories = await fetchProductCategories();
+      
+      for (const cat of categories) {
+        if (cat.productCategoryId && serialNo.startsWith(cat.productCategoryId)) {
+          const fallbackSerialNo = serialNo.replace(cat.productCategoryId, "undefined");
+          console.log(`Checking fallback: ${fallbackSerialNo}`);
+          const fallbackRef = doc(db, "serialNumbers", fallbackSerialNo);
+          const fallbackSnapshot = await getDoc(fallbackRef);
+          
+          if (fallbackSnapshot.exists()) {
+            serialSnapshot = fallbackSnapshot;
+            console.log("Found legacy serial number!");
+            break;
+          }
+        }
+      }
+    }
 
     if (!serialSnapshot.exists()) {
       return null;
@@ -667,6 +889,7 @@ export const fetchCustomerDetails = async (serialNo: string) => {
     return {
       productName: productData?.productName,
       productDetails: productData?.productDetails,
+      description: productData?.description,
       productImage: productData?.productImage,
       batchNo: batchData?.batchNo,
       testReport: batchData?.testReport,
@@ -675,5 +898,54 @@ export const fetchCustomerDetails = async (serialNo: string) => {
   } catch (error) {
     console.error("Error fetching customer details:", error);
     return null;
+  }
+};
+
+export const deleteBatch = async (productId: string, batchId: string) => {
+  try {
+    // 1. Get all packets for this batch
+    const packetsRef = collection(db, `productCategory/${productId}/batches/${batchId}/packets`);
+    const snapshot = await getDocs(packetsRef);
+    
+    // Safety check: Don't delete if any packet has a refractometer report
+    const hasReports = snapshot.docs.some(doc => {
+      const data = doc.data();
+      return !!data.refractometerReport && data.refractometerReport !== "N/A" && data.refractometerReport !== "";
+    });
+
+    if (hasReports) {
+      return { 
+        success: false, 
+        message: "This batch contains packets with refractometer reports and cannot be deleted for data integrity." 
+      };
+    }
+    
+    const batch = writeBatch(db);
+    
+    // 2. Delete each packet and its global serial number
+    for (const packetDoc of snapshot.docs) {
+      const packetData = packetDoc.data();
+      const serialNo = packetData.serialNo;
+      
+      // Delete packet document
+      batch.delete(packetDoc.ref);
+      
+      // Delete global serial number document if it exists
+      if (serialNo) {
+        batch.delete(doc(db, "serialNumbers", serialNo));
+      }
+    }
+    
+    // 3. Delete the batch document
+    const batchRef = doc(db, `productCategory/${productId}/batches/${batchId}`);
+    batch.delete(batchRef);
+    
+    // Commit the batch
+    await batch.commit();
+    
+    return { success: true, message: "Batch deleted successfully" };
+  } catch (error) {
+    console.error("Error deleting batch: ", error);
+    return { success: false, message: error instanceof Error ? error.message : "An unknown error occurred" };
   }
 };
