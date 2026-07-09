@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { LogOut, Mail } from 'lucide-react';
 import {
@@ -17,9 +18,14 @@ import {
 
 const Navbar = () => {
   const { user, userName, userRole, logout, loading } = useAuth();
+  const pathname = usePathname();
+
+  if (pathname && pathname.startsWith('/customer')) {
+    return null;
+  }
 
   return (
-    <nav className="bg-white shadow-sm fixed w-full z-10">
+    <nav className="bg-white shadow-sm sticky top-0 w-full z-10">
       <div className="mx-auto lg:pl-10 md:pl-6 pl-4 pr-4 sm:pr-6 lg:pr-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
@@ -28,16 +34,16 @@ const Navbar = () => {
               <Link href="/" className="flex items-center">
                 <div className="relative md:h-20 sm:h-16 h-12 md:w-20 sm:w-16 w-12">
                   <Image
-                    src="/images/K2K Logo.png"
-                    alt="Kishan2Kitchen Logo"
+                    src="/images/univillage-logo.jpeg"
+                    alt="UniVillage Logo"
                     fill
                     sizes="(max-width: 640px) 48px, (max-width: 768px) 64px, 80px"
-                    className="object-cover rounded-md"
+                    className="object-contain rounded-md"
                     priority
                   />
                 </div>
                 <span className="logoFont ml-2 lg:text-3xl md:text-2xl sm:text-xl font-semibold text-green-800">
-                  Kishan2Kitchen
+                  UniVillage
                 </span>
               </Link>
             </div>

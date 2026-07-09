@@ -1,51 +1,17 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Leaf, Search, ShieldCheck } from "lucide-react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Search, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-import { useAuth } from "@/contexts/AuthContext";
-import toast from "react-hot-toast";
 
 const CustomerSearch = () => {
   const [serialNo, setSerialNo] = useState<string>("");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { setUserFromToken, user, userRole, loading } = useAuth();
-  const token = searchParams.get("token");
-
-  // Handle token-based authentication
-  useEffect(() => {
-    if (token && !user) {
-      setUserFromToken(token).catch((error) => {
-        console.error("Token verification failed:", error);
-        toast.error("Invalid token. Please try again.");
-        router.push("/login");
-      });
-    }
-  }, [token, user, setUserFromToken, router]);
-
-  // Show loading while verifying token
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verifying access...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If no token and no user, redirect to login
-  if (!token && !user) {
-    router.push("/login");
-    return null;
-  }
 
   const handleSearch = () => {
     const trimmedSerialNo = serialNo.trim();
@@ -70,14 +36,21 @@ const CustomerSearch = () => {
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <div className="flex justify-center mb-6">
-            <Leaf className="h-12 w-12 text-green-600 dark:text-green-400" />
+            <Image
+              src="/images/univillage-logo.jpeg"
+              alt="UniVillage Logo"
+              width={160}
+              height={160}
+              className="object-contain rounded-xl shadow-sm"
+              priority
+            />
           </div>
           
           <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-50">
-            Natural Product Verification
+            Verify Your Product 
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-            Verify the authenticity and quality of your natural grocery products
+          <p className="text-lg md:text-xl italic font-serif text-green-800 dark:text-green-200 mb-8 max-w-md mx-auto relative px-6 py-3 border-l-4 border-green-600 dark:border-green-400 bg-green-50/50 dark:bg-green-950/20 rounded-r-lg shadow-sm">
+            “Trust is not claimed. It is proven.”
           </p>
         </div>
 
@@ -119,7 +92,7 @@ const CustomerSearch = () => {
                     value={serialNo}
                     onChange={(e) => setSerialNo(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Enter product serial number"
+                    placeholder="Enter Bottle Number/Jar Number "
                   />
                   <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 </div>
@@ -131,16 +104,16 @@ const CustomerSearch = () => {
                   Verify Product
                 </Button>
                 
-                <p className="text-sm text-center text-gray-500 dark:text-gray-400">
+                {/* <p className="text-sm text-center text-gray-500 dark:text-gray-400">
                   Enter the serial number found on your product packaging
-                </p>
+                </p> */}
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Trust Indicators */}
-        <div className="mt-12 text-center">
+        {/* <div className="mt-12 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Trusted by leading natural product manufacturers worldwide
           </p>
@@ -173,7 +146,7 @@ const CustomerSearch = () => {
               />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
