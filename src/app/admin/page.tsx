@@ -20,7 +20,7 @@ import {
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
-import { Package, ArrowLeft, Pencil } from "lucide-react";
+import { Package, Pencil } from "lucide-react";
 import Loader from "@/components/Loader";
 
 interface ProductCategory {

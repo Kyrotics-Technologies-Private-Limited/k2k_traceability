@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Link from 'next/link';
 import { Toaster } from "react-hot-toast"; // Import Toaster
 import { AuthProvider } from '@/contexts/AuthContext';
 import Navbar from '../components/Navbar';

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { TRACEABILITY_COLLECTIONS, getTraceabilityFirestore, requireTraceabilityAdmin } from "@/lib/traceability";
 import { clampLimit, getCursor, getDocumentIdPage, orderByDocumentId } from "@/lib/traceability/api-utils";
 
-export const VIOLATION_SEVERITY: Record<string, "critical" | "high" | "medium" | "low"> = {
+const VIOLATION_SEVERITY: Record<string, "critical" | "high" | "medium" | "low"> = {
   ORPHAN_BATCH: "high",
   ORPHAN_PACKET: "high",
   DUPLICATE_BATCH_CODE: "critical",

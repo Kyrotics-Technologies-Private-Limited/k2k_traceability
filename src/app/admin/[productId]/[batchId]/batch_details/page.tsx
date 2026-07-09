@@ -22,7 +22,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Plus,
   Package,
-  List,
   ArrowUp,
   ArrowDown,
   FileText,
@@ -44,7 +43,6 @@ import {
   deleteBatch,
   updateRefractometerReportById,
   updateBatchTestReport,
-  ProductCategory,
 } from "../../../../../../firebase/firebaseUtil";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -85,7 +83,6 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
   const [batchDetails, setBatchDetails] = useState<BatchData | null>(null);
   const [productCategoryId, setProductCategoryId] = useState<string>("");
   const [productName, setProductName] = useState<string>("");
-  const [productDescription, setProductDescription] = useState<string>("");
   const [packetDetails, setPacketDetails] = useState<PacketDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -116,7 +113,6 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
         if (product) {
           setProductCategoryId(product.productCategoryId || "");
           setProductName(product.productName || "");
-          setProductDescription(product.description || "");
         }
         const packets = await fetchPacketDetails(productId, batchId);
         setPacketDetails(packets);
@@ -185,9 +181,7 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
     }
   };
 
-  const handleViewExistingPackets = () => {
-    router.push(`/admin/${productId}/${batchId}/existing_packets`);
-  };
+
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -359,11 +353,7 @@ const BatchDetails: React.FC<Props> = ({ params }) => {
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 capitalize">
                     {productName} - Batch {batchDetails?.batchNo || "Loading..."}
                   </h1>
-                  {/* {productDescription && (
-                    <p className="text-gray-600 dark:text-gray-300 text-sm italic line-clamp-2 max-w-2xl mb-1">
-                      {productDescription}
-                    </p>
-                  )} */}
+
                   <p className="text-gray-500 dark:text-gray-400">
                     Manage batch details and packets
                   </p>

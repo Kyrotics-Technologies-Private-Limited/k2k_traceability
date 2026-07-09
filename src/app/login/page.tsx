@@ -29,8 +29,9 @@ export default function LoginPage() {
       await login(adminEmail, adminPassword, "admin");
       toast.success("Admin login successful!");
       router.push("/admin");
-    } catch (error: any) {
-      toast.error(error.message || "Login failed");
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : "Login failed";
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
