@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin } from "@/lib/firebase-admin";
+import { isAdminRole, requireBearerAuth } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
+  const auth = await requireBearerAuth(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
   const { searchParams } = new URL(request.url);
   const uid = searchParams.get("uid");
 
@@ -9,81 +15,39 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "No UID provided" }, { status: 400 });
   }
 
-  try {
-    // Check if admin is properly initialized
-    if (!admin.apps.length) {
-      console.warn("Firebase Admin not initialized, returning fallback user data");
-      return NextResponse.json({ 
-        success: true,
-        user: {
-          uid: uid,
-          name: "User",
-          email: null,
-          phoneNumber: null,
-          role: "customer",
-          createdAt: null,
-          lastLoginAt: null
-        }
-      });
-    }
+  if (uid !== auth.uid && !isAdminRole(auth.role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-    // Get user details from Firestore users collection
+  try {
     const db = admin.firestore();
-    const userDoc = await db.collection('users').doc(uid).get();
+    const userDoc = await db.collection("users").doc(uid).get();
 
     if (!userDoc.exists) {
-      console.warn(`User document not found for UID: ${uid}`);
-      return NextResponse.json({ 
-        success: true,
-        user: {
-          uid: uid,
-          name: "User",
-          email: null,
-          phoneNumber: null,
-          role: "customer",
-          createdAt: null,
-          lastLoginAt: null
-        }
-      });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userData = userDoc.data();    
-    return NextResponse.json({ 
+    const userData = userDoc.data()!;
+    return NextResponse.json({
       success: true,
       user: {
-        uid: uid,
-        name: userData?.name || userData?.displayName || "User",
-        email: userData?.email || null,
-        phoneNumber: userData?.phoneNumber || null,
-        role: userData?.role || "customer",
-        createdAt: userData?.createdAt || null,
-        lastLoginAt: userData?.lastLoginAt || null,
-        // Include any other fields from your users collection
-        ...userData
-      }
+        uid,
+        name: userData.name || userData.displayName || "User",
+        email: userData.email || null,
+        phoneNumber: userData.phoneNumber || null,
+        role: userData.role || "customer",
+        createdAt: userData.createdAt || null,
+        lastLoginAt: userData.lastLoginAt || null,
+      },
     });
   } catch (error) {
     console.error("Error fetching user details:", error);
-    
-    // If Firebase Admin is not working, return fallback data
-    if (error instanceof Error && error.message.includes("Firebase Admin not properly initialized")) {
-      return NextResponse.json({ 
-        success: true,
-        user: {
-          uid: uid,
-          name: "User",
-          email: null,
-          phoneNumber: null,
-          role: "customer",
-          createdAt: null,
-          lastLoginAt: null
-        }
-      });
-    }
-    
-    return NextResponse.json({ 
-      error: "Failed to fetch user details", 
-      details: error instanceof Error ? error.message : "Unknown error" 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Failed to fetch user details",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }

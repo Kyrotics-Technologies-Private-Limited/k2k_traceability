@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast"; // Import Toaster
 import { AuthProvider } from '@/contexts/AuthContext';
-import Navbar from '../components/Navbar';
+import Navbar from '@/components/common/Navbar';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,6 +15,11 @@ const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
+});
+const displaySerif = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -29,16 +35,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${displaySerif.variable} antialiased`}
       >
         <AuthProvider>
-          <div className="bg-gray-100 ">
+          <div className="portal-shell">
+          <div className="portal-pattern" aria-hidden="true" />
           {/* Navigation Bar */}
           <Navbar />
 
           {/* Main Content */}
-          <main className="w-full mx-auto sm:px-0 lg:px-0 overflow-y-hidden">
-          {/* <main className=""> */}
+          <main className="relative z-10 w-full flex-grow mx-auto sm:px-0 lg:px-0 overflow-y-hidden">
             {children}
           </main>
         </div>

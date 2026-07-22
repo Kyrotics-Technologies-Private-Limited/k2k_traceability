@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { LogOut, Mail } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,7 +24,7 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 w-full z-10">
+    <nav className="relative z-20 bg-green-50/95 backdrop-blur-sm border-b border-green-100 shadow-sm sticky top-0 w-full">
       <div className="mx-auto lg:pl-10 md:pl-6 pl-4 pr-4 sm:pr-6 lg:pr-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
@@ -102,10 +101,10 @@ const Navbar = () => {
                 </DropdownMenu>
               </div>
             ) : (
-              <Link href="/login">
-                <Button variant="outline" size="sm">
-                  Login
-                </Button>
+              <Link href="/customer" title="Go to Customer Portal">
+                <div className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center cursor-pointer hover:bg-green-700 transition-colors shadow-sm">
+                  <span className="text-sm font-bold text-white">C</span>
+                </div>
               </Link>
             )}
           </div>
@@ -148,10 +147,10 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login">
-                <Button variant="outline" size="sm">
-                  Login
-                </Button>
+              <Link href="/customer" title="Go to Customer Portal">
+                <div className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center cursor-pointer hover:bg-green-700 transition-colors shadow-sm">
+                  <span className="text-sm font-bold text-white">C</span>
+                </div>
               </Link>
             )}
           </div>

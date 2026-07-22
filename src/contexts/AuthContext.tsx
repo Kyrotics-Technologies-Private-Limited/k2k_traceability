@@ -1,14 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
+import {
   User,
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  RecaptchaVerifier, 
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  RecaptchaVerifier,
   signInWithPhoneNumber,
-  ConfirmationResult as FirebaseConfirmationResult 
+  ConfirmationResult as FirebaseConfirmationResult
 } from 'firebase/auth';
 import { auth } from '../../firebase/firebaseConfig';
 
@@ -28,13 +28,12 @@ interface AuthContextType {
   userRole: 'admin' | 'customer' | null;
   userName: string | null;
   loading: boolean;
-  login: (email: string, password: string, role: 'admin' | 'customer') => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   loginWithPhone: (phoneNumber: string) => Promise<void>;
   verifyOtp: (otp: string) => Promise<User>;
   logout: () => Promise<void>;
-  setUserFromToken: (token: string) => Promise<void>;
-  fetchUserDetails: (uid: string) => Promise<void>;
-  createUserDocument: (uid: string, userData: UserData) => Promise<void>;
+  fetchUserDetails: (uid: string, token: string) => Promise<void>;
+  createUserDocument: (uid: string, userData: UserData, token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,37 +55,70 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log('🔐 Auth State Changed:', {
-        user: user ? {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          emailVerified: user.emailVerified
-        } : null,
-        timestamp: new Date().toISOString()
-      });
       setUser(user);
-      
+
       // Fetch user details if user is logged in
       if (user) {
-        await fetchUserDetails(user.uid);
-        // Optionally create user document if it doesn't exist
-        // await createUserDocument(user.uid, user);
+        // --- Task 4.1: Read role from JWT custom claim first (fast path) ---
+        const tokenResult = await user.getIdTokenResult();
+        const claimRole = tokenResult.claims.role as string | undefined;
+
+        if (claimRole === 'admin' || claimRole === 'customer') {
+          // Role is already in token - no API fetch needed
+          setUserRole(claimRole);
+          setUserName(user.displayName || user.email || 'User');
+        } else {
+          // Fallback to fetch details with token
+          const token = await user.getIdToken();
+          await fetchUserDetails(user.uid, token);
+        }
       } else {
         setUserName(null);
+        setUserRole(null);
       }
-      
+
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
 
-  const login = async (email: string, password: string, role: 'admin' | 'customer') => {
+  const login = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setUserRole(role);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const loggedInUser = userCredential.user;
+      const token = await loggedInUser.getIdToken();
+
+      // Sync profile only — role is never written from the client
+      await createUserDocument(loggedInUser.uid, {
+        uid: loggedInUser.uid,
+        displayName: loggedInUser.displayName || email.split('@')[0],
+        email: loggedInUser.email,
+        phoneNumber: loggedInUser.phoneNumber,
+      }, token);
+
+      try {
+        await fetch('/api/auth/set-claims', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ uid: loggedInUser.uid }),
+        });
+        await loggedInUser.getIdToken(true);
+      } catch (claimErr) {
+        console.warn('[auth] Custom claim stamping failed:', claimErr);
+      }
+
+      const tokenResult = await loggedInUser.getIdTokenResult();
+      const resolvedRole = tokenResult.claims.role as string | undefined;
+      if (resolvedRole !== 'admin') {
+        await signOut(auth);
+        throw new Error('Access denied. This account is not an administrator.');
+      }
+
+      setUserRole('admin');
     } catch (error) {
       throw error;
     }
@@ -118,21 +150,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('No confirmation result available');
       }
       const result = await confirmationResult.confirm(otp);
-      setUserRole('customer');
+      const token = await result.user.getIdToken();
+
+      // Create user profile only — server assigns role on first create
+      await createUserDocument(result.user.uid, {
+        uid: result.user.uid,
+        phoneNumber: result.user.phoneNumber,
+      }, token);
+
+      try {
+        await fetch('/api/auth/set-claims', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ uid: result.user.uid }),
+        });
+        await result.user.getIdToken(true);
+      } catch (claimErr) {
+        console.warn('[auth] OTP claims stamp failed:', claimErr);
+      }
+
+      const tokenResult = await result.user.getIdTokenResult();
+      const resolvedRole = tokenResult.claims.role as 'admin' | 'customer' | undefined;
+      setUserRole(resolvedRole === 'admin' ? 'admin' : 'customer');
       return result.user;
     } catch (error) {
       throw error;
     }
   };
 
-  const fetchUserDetails = async (uid: string) => {
+  const fetchUserDetails = async (uid: string, token: string) => {
     try {
-      const response = await fetch(`/api/get-user?uid=${uid}`);
+      const response = await fetch(`/api/get-user?uid=${uid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         const userName = data.user.name || data.user.displayName || data.user.email || 'User';
         setUserName(userName);
-        
+
         // You can also set the user role from Firestore if needed
         if (data.user.role) {
           setUserRole(data.user.role);
@@ -147,56 +207,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const createUserDocument = async (uid: string, userData: UserData) => {
+  const createUserDocument = async (uid: string, userData: UserData, token: string) => {
     try {
       const response = await fetch('/api/create-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           uid,
-          name: userData.displayName || userData.email || 'User',
+          name: userData.displayName || userData.name || userData.email || 'User',
           email: userData.email || null,
           phoneNumber: userData.phoneNumber || null,
-          role: userRole || 'customer'
         }),
       });
-      
+
       if (response.ok) {
         console.log('User document created successfully');
       }
     } catch (error) {
       console.error('Error creating user document:', error);
-    }
-  };
-
-  const setUserFromToken = async (token: string) => {
-    try {
-      // Verify token via API
-      const response = await fetch(`/api/verify-token?token=${token}`);
-      if (response.ok) {
-        const data = await response.json();
-        // Create a mock user object for token-based auth
-        const mockUser = {
-          uid: data.user.uid,
-          email: data.user.email,
-          emailVerified: data.user.email_verified,
-        } as User;
-        setUser(mockUser);
-        
-        // Fetch user details from Firestore which will set the role
-        await fetchUserDetails(data.user.uid);
-        
-        // If no role is set from Firestore, default to customer
-        if (!userRole) {
-          setUserRole('customer');
-        }
-      } else {
-        throw new Error('Invalid token');
-      }
-    } catch (error) {
-      throw error;
     }
   };
 
@@ -220,7 +251,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loginWithPhone,
     verifyOtp,
     logout,
-    setUserFromToken,
     fetchUserDetails,
     createUserDocument,
   };

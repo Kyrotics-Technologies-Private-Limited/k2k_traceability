@@ -3,12 +3,21 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .portal-shell {
+    @apply min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-950;
+  }
+
+  .portal-pattern {
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNTQuNjI3IDQuMzczQzU2LjA0OSAyLjk1MSA1OC4zNzEgMi45NTEgNTkuNzkzIDQuMzczQzYxLjIxNSA1Ljc5NSA2MS4yMTUgOC4xMTcgNTkuNzkzIDkuNTM5TDU1LjQyIDEzLjkxMkM1My45OTggMTUuMzM0IDUxLjY3NiAxNS4zMzQgNTAuMjU0IDEzLjkxMkM0OC44MzIgMTIuNDkgNDguODMyIDEwLjE2OCA1MC4yNTQgOC43NDZMNTQ2MjcgNC4zNzN6TTMwIDMwQzMwIDEzLjQzMSA0My40MzEgMCAzMCAwQzE2LjU2OSAwIDMwIDEzLjQzMSAzMCAzMEMzMCA0Ni41NjkgMTYuNTY5IDYwIDMwIDYwQzQzLjQzMSA2MCAzMCA0Ni41NjkgMzAgMzB6IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz48L3N2Zz4=");
+    @apply absolute inset-0 opacity-10 pointer-events-none;
   }
 }
 

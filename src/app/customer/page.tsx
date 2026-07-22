@@ -29,10 +29,7 @@ const CustomerSearch = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-950">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNTQuNjI3IDQuMzczQzU2LjA0OSAyLjk1MSA1OC4zNzEgMi45NTEgNTkuNzkzIDQuMzczQzYxLjIxNSA1Ljc5NSA2MS4yMTUgOC4xMTcgNTkuNzkzIDkuNTM5TDU1LjQyIDEzLjkxMkM1My45OTggMTUuMzM0IDUxLjY3NiAxNS4zMzQgNTAuMjU0IDEzLjkxMkM0OC44MzIgMTIuNDkgNDguODMyIDEwLjE2OCA1MC4yNTQgOC43NDZMNTQ2MjcgNC4zNzN6TTMwIDMwQzMwIDEzLjQzMSA0My40MzEgMCAzMCAwQzE2LjU2OSAwIDMwIDEzLjQzMSAzMCAzMEMzMCA0Ni41NjkgMTYuNTY5IDYwIDMwIDYwQzQzLjQzMSA2MCAzMCA0Ni41NjkgMzAgMzB6IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz48L3N2Zz4=')] opacity-10" />
-
+    <div className="min-h-screen relative overflow-hidden">
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <div className="flex justify-center mb-6">
@@ -46,10 +43,10 @@ const CustomerSearch = () => {
             />
           </div>
           
-          <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-50">
+          <h1 className="font-display text-4xl font-bold mb-4 text-gray-900 dark:text-gray-50">
             Verify Your Product 
           </h1>
-          <p className="text-lg md:text-xl italic font-serif text-green-800 dark:text-green-200 mb-8 max-w-md mx-auto relative px-6 py-3 border-l-4 border-green-600 dark:border-green-400 bg-green-50/50 dark:bg-green-950/20 rounded-r-lg shadow-sm">
+          <p className="font-display text-lg md:text-xl italic font-normal text-green-800 dark:text-green-200 mb-8 max-w-md mx-auto relative px-6 py-3 border-l-4 border-green-600 dark:border-green-400 bg-green-50/50 dark:bg-green-950/20 rounded-r-lg shadow-sm">
             “Trust is not claimed. It is proven.”
           </p>
         </div>
@@ -63,7 +60,7 @@ const CustomerSearch = () => {
                   <div className="bg-green-100 dark:bg-green-800/50 p-3 rounded-full w-12 h-12 mx-auto mb-2 flex items-center justify-center">
                     <ShieldCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">Product Authenticity</p>
+                  <p className="text-sm font-light text-gray-600 dark:text-gray-300">Product Authenticity</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-green-100 dark:bg-green-800/50 p-3 rounded-full w-12 h-12 mx-auto mb-2 flex items-center justify-center">
@@ -71,7 +68,7 @@ const CustomerSearch = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">Batch Reports</p>
+                  <p className="text-sm font-light text-gray-600 dark:text-gray-300">Batch Reports</p>
                 </div>
                 <div className="text-center">
                   <div className="bg-green-100 dark:bg-green-800/50 p-3 rounded-full w-12 h-12 mx-auto mb-2 flex items-center justify-center">
@@ -79,7 +76,7 @@ const CustomerSearch = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                     </svg>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">Quality Analysis</p>
+                  <p className="text-sm font-light text-gray-600 dark:text-gray-300">Quality Analysis</p>
                 </div>
               </div>
 
@@ -88,7 +85,7 @@ const CustomerSearch = () => {
                 <div className="relative">
                   <Input
                     type="text"
-                    className="pl-4 pr-12 py-6 text-lg border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600"
+                    className="pl-4 pr-12 py-6 text-lg font-light border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600"
                     value={serialNo}
                     onChange={(e) => setSerialNo(e.target.value)}
                     onKeyPress={handleKeyPress}
@@ -99,7 +96,7 @@ const CustomerSearch = () => {
                 
                 <Button 
                   onClick={handleSearch}
-                  className="w-full py-6 text-lg bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 transition-colors duration-200"
+                  className="w-full py-6 text-lg font-bold bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 transition-colors duration-200"
                 >
                   Verify Product
                 </Button>

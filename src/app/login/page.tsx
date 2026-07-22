@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      await login(adminEmail, adminPassword, "admin");
+      await login(adminEmail, adminPassword);
       toast.success("Admin login successful!");
       router.push("/admin");
     } catch (error) {
@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -57,7 +57,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <Card>
+        <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90 shadow-md border-green-100">
           <CardHeader>
             <CardTitle className="text-center">Admin Login</CardTitle>
           </CardHeader>

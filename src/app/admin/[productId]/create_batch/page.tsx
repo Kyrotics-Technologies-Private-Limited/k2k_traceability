@@ -14,13 +14,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Package, Layers, Upload, ArrowLeft } from "lucide-react";
 import {
-  fetchProductByProductId,
-  addBatchToProduct,
-  fetchBatchesByProductId,
-} from "../../../../../firebase/firebaseUtil";
+  adminCreateBatch,
+  adminFetchBatches,
+  adminFetchProduct,
+} from "@/lib/admin-client";
+import type { AdminBatch } from "@/lib/admin-data/types";
+import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
-import Loader from "@/components/Loader";
+import Loader from "@/components/common/Loader";
 
 interface Props {
   params: {
@@ -36,15 +38,10 @@ interface ProductDetails {
   productImage?: string;
 }
 
-interface Batch {
-  id: string;
-  batchNo?: string;
-  quantity?: number;
-}
-
 const BatchesPage: React.FC<Props> = ({ params }) => {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [batches, setBatches] = useState<Batch[]>([]);
+  const [batches, setBatches] = useState<AdminBatch[]>([]);
   const [productDetails, setProductDetails] = useState<ProductDetails | null>(
     null
   );
@@ -58,12 +55,13 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   const { productId } = params;
 
   useEffect(() => {
+    if (!user) return;
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const product = await fetchProductByProductId(productId);
+        const product = await adminFetchProduct(user, productId);
         setProductDetails(product);
-        const fetchedBatches = await fetchBatchesByProductId(productId);
+        const fetchedBatches = await adminFetchBatches(user, productId);
         setBatches(fetchedBatches);
       } finally {
         setIsLoading(false);
@@ -71,7 +69,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
     };
 
     fetchData();
-  }, [productId]);
+  }, [productId, user]);
 
   const handleDialogOpen = () => {
     if (batches.length > 0) {
@@ -87,23 +85,21 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   };
 
   const handleCreateBatch = async () => {
-    const newBatchId = await addBatchToProduct(
-      productId,
-      Number(quantity),
-      testReport
-    );
-    // Handle the case where newBatchId might be an object with success/message
-    if (typeof newBatchId === "string") {
+    if (!user) return;
+    try {
+      const created = await adminCreateBatch(user, productId, {
+        limitQuantity: Number(quantity),
+        testReport,
+      });
       setBatches([
         ...batches,
-        { id: newBatchId, batchNo, quantity: Number(quantity) },
+        { id: created.batchId, batchNo: created.batchNo, quantity: Number(quantity) },
       ]);
       setQuantity("");
       setTestReport(null);
       setOpen(false);
-    } else {
-      // Handle error case
-      console.error("Failed to create batch:", newBatchId.message);
+    } catch (error) {
+      console.error("Failed to create batch:", error);
     }
   };
 
@@ -139,7 +135,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[url('/grid.svg')] bg-fixed bg-green-50/90 dark:bg-green-950/90">
+    <div className="min-h-screen pb-10">
       <div className="absolute inset-0 bg-gradient-to-b from-green-50/90 to-green-100/90 dark:from-green-950/90 dark:to-green-900/90" />
 
       <div className="relative container mx-auto px-4 py-8">
@@ -192,9 +188,9 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                       {productDetails.description}
                     </p>
                   )}
-                  <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm">
+                  {/* <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm">
                     {productDetails?.productDetails || "Product Details"}
-                  </p>
+                  </p> */}
                 </div>
 
                 <div>
@@ -267,11 +263,10 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                 Test Report
               </label>
               <div
-                className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
-                  dragActive
+                className={`border-2 border-dashed rounded-lg p-6 transition-colors ${dragActive
                     ? "border-green-500 bg-green-50/50"
                     : "border-gray-200 dark:border-gray-700"
-                } relative`}
+                  } relative`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}

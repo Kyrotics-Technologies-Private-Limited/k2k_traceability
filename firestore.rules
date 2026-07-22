@@ -1,0 +1,116 @@
+rules_version = '2';
+
+
+
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+
+      return request.auth != null;
+
+    }
+
+
+
+    function isAdmin() {
+
+      return isSignedIn() && request.auth.token.role == 'admin';
+
+    }
+
+
+
+    // User profiles — server APIs manage writes; clients may read own doc only
+
+    match /users/{userId} {
+
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow write: if false;
+
+    }
+
+
+
+    // Customer serial lookup (public read for printed label verification)
+
+    match /serialNumbers/{serialId} {
+
+      allow read: if true;
+
+      allow write: if isAdmin();
+
+    }
+
+
+
+    // Product catalog + nested batches/packets
+
+    match /productCategory/{productId} {
+
+      allow read: if true;
+
+      allow write: if isAdmin();
+
+
+
+      match /batches/{batchId} {
+
+        allow read: if true;
+
+        allow write: if isAdmin();
+
+
+
+        match /packets/{packetId} {
+
+          allow read: if true;
+
+          allow write: if isAdmin();
+
+        }
+
+      }
+
+    }
+
+
+
+    // Mirror product docs (synced from productCategory)
+
+    match /products/{productId} {
+
+      allow read: if true;
+
+      allow write: if isAdmin();
+
+    }
+
+
+
+    // Inventory categories (if used alongside productCategory)
+
+    match /categories/{categoryId} {
+
+      allow read: if true;
+
+      allow write: if isAdmin();
+
+
+
+      match /{document=**} {
+
+        allow read: if true;
+
+        allow write: if isAdmin();
+
+      }
+
+    }
+
+  }
+
+}
+

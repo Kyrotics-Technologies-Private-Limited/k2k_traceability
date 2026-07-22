@@ -11,22 +11,23 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
-  fetchProductCategories,
-  addProduct,
-  ProductCategory,
-} from "../../../../firebase/firebaseUtil"; // Adjust path as needed
+  adminAddProduct,
+  adminFetchProducts,
+} from "@/lib/admin-client";
+import type { ProductCategory } from "@/lib/admin-data/types";
+import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { Package } from "lucide-react";
-import Loader from "@/components/Loader";
-
-// Interface is now imported from firebaseUtil
+import Loader from "@/components/common/Loader";
 
 export default function ProductPage() {
+  const { user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [productName, setProductName] = useState("");
   const [productDetails, setProductDetails] = useState("");
   const [description, setDescription] = useState("");
   const [productImage, setProductImage] = useState<File | null>(null);
+  const [productCategoryId, setProductCategoryId] = useState("");
   const [productCategories, setProductCategories] = useState<ProductCategory[]>(
     []
   ); // Hold fetched categories
@@ -35,18 +36,18 @@ export default function ProductPage() {
   const [error, setError] = useState<string | null>(null); // Error handling
 
   useEffect(() => {
-    // Fetch product categories when the component mounts
+    if (!user) return;
     const loadCategories = async () => {
       try {
         setIsLoading(true);
-        const categories = await fetchProductCategories();
+        const categories = await adminFetchProducts(user);
         setProductCategories(categories);
       } finally {
         setIsLoading(false);
       }
     };
     loadCategories();
-  }, []);
+  }, [user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -55,30 +56,27 @@ export default function ProductPage() {
   };
 
   const handleSubmit = async () => {
+    if (!user) return;
     setLoading(true);
-    setError(null); // Reset error before submission
+    setError(null);
     try {
-      // Call the addProduct function and pass necessary data
-      const result = await addProduct(
+      await adminAddProduct(user, {
         productName,
         productDetails,
         description,
-        productImage
-      );
-      if (result.success) {
-        // Reload categories after successful addition
-        const categories = await fetchProductCategories();
-        setProductCategories(categories);
-        setIsDialogOpen(false);
-        setProductName("");
-        setProductDetails("");
-        setDescription("");
-        setProductImage(null);
-      } else {
-        setError(result.message); // Show error message
-      }
-    } catch {
-      setError("An unexpected error occurred. Please try again.");
+        productImage,
+        productCategoryId: productCategoryId || undefined,
+      });
+      const categories = await adminFetchProducts(user);
+      setProductCategories(categories);
+      setIsDialogOpen(false);
+      setProductName("");
+      setProductDetails("");
+      setDescription("");
+      setProductImage(null);
+      setProductCategoryId("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -145,6 +143,12 @@ export default function ProductPage() {
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
               placeholder="Enter product name"
+              className="mb-4"
+            />
+            <Input
+              value={productCategoryId}
+              onChange={(e) => setProductCategoryId(e.target.value)}
+              placeholder="Product Category ID (e.g. 006, 008) - Optional"
               className="mb-4"
             />
             <Input

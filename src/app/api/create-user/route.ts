@@ -1,49 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin } from "@/lib/firebase-admin";
+import { requireBearerAuth } from "@/lib/api-auth";
 
+/**
+ * Upserts profile fields for the authenticated user.
+ * Role is NEVER accepted from the client — it is set server-side on first create only.
+ */
 export async function POST(request: NextRequest) {
+  const auth = await requireBearerAuth(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
   try {
     const body = await request.json();
-    const { uid, name, email, phoneNumber, role = "customer" } = body;
+    const uid = body.uid as string | undefined;
 
     if (!uid) {
       return NextResponse.json({ error: "UID is required" }, { status: 400 });
     }
 
-    // Check if admin is properly initialized
-    if (!admin.apps.length) {
-      return NextResponse.json({ 
-        error: "Firebase Admin not initialized" 
-      }, { status: 500 });
+    if (uid !== auth.uid) {
+      return NextResponse.json({ error: "Forbidden: cannot modify another user" }, { status: 403 });
     }
 
-    // Create user document in Firestore
     const db = admin.firestore();
-    const userData = {
-      name: name || "User",
-      email: email || null,
-      phoneNumber: phoneNumber || null,
-      role: role,
-      createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+    const userRef = db.collection("users").doc(uid);
+    const existing = await userRef.get();
+    const now = new Date().toISOString();
+
+    const profileUpdate: Record<string, unknown> = {
+      name: body.name || body.displayName || "User",
+      email: body.email ?? null,
+      phoneNumber: body.phoneNumber ?? null,
+      lastLoginAt: now,
+      updatedAt: now,
     };
 
-    await db.collection('users').doc(uid).set(userData, { merge: true });
+    if (!existing.exists) {
+      profileUpdate.role = "customer";
+      profileUpdate.createdAt = now;
+      await userRef.set(profileUpdate);
+    } else {
+      // Never overwrite role from client requests
+      await userRef.update(profileUpdate);
+    }
 
-    return NextResponse.json({ 
+    const saved = (await userRef.get()).data()!;
+
+    return NextResponse.json({
       success: true,
-      message: "User created successfully",
+      message: existing.exists ? "User profile updated" : "User created successfully",
       user: {
         uid,
-        ...userData
-      }
+        name: saved.name,
+        email: saved.email ?? null,
+        phoneNumber: saved.phoneNumber ?? null,
+        role: saved.role ?? "customer",
+        createdAt: saved.createdAt ?? null,
+        lastLoginAt: saved.lastLoginAt ?? null,
+        updatedAt: saved.updatedAt ?? null,
+      },
     });
   } catch (error) {
     console.error("Error creating user:", error);
-    return NextResponse.json({ 
-      error: "Failed to create user", 
-      details: error instanceof Error ? error.message : "Unknown error" 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Failed to create user",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
