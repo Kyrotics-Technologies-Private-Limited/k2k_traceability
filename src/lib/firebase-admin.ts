@@ -1,7 +1,7 @@
 // lib/firebase-admin.ts
 import * as firebaseAdmin from "firebase-admin";
 
-let admin: typeof firebaseAdmin;
+let initialized = false;
 
 function serviceAccountProjectId(clientEmail: string | undefined): string | null {
   if (!clientEmail) return null;
@@ -10,7 +10,12 @@ function serviceAccountProjectId(clientEmail: string | undefined): string | null
   return match?.[1] ?? null;
 }
 
-if (!firebaseAdmin.apps.length) {
+function ensureAdmin(): typeof firebaseAdmin {
+  if (initialized || firebaseAdmin.apps.length) {
+    initialized = true;
+    return firebaseAdmin;
+  }
+
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
@@ -52,13 +57,19 @@ if (!firebaseAdmin.apps.length) {
         `Firebase Admin initialized with ADC for project ${projectId}`
       );
     }
-    admin = firebaseAdmin;
+    initialized = true;
+    return firebaseAdmin;
   } catch (error) {
     console.error("Failed to initialize Firebase Admin:", error);
     throw error;
   }
-} else {
-  admin = firebaseAdmin;
 }
 
-export { admin };
+/** Lazily initialized so `next build` can import API routes without credentials. */
+export const admin = new Proxy({} as typeof firebaseAdmin, {
+  get(_target, prop, receiver) {
+    const instance = ensureAdmin();
+    const value = Reflect.get(instance, prop, receiver);
+    return typeof value === "function" ? value.bind(instance) : value;
+  },
+});
