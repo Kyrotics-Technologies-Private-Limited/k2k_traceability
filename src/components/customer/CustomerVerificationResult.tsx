@@ -66,11 +66,11 @@ export function CustomerVerificationResult({
               )}
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-[#faf9f4] border-t border-gray-100 flex-shrink-0">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#2c5325]/10 flex items-center justify-center text-[#2c5325]">
+            <div className="flex items-center gap-3 p-4 bg-[#2c5325] border-t border-[#2c5325] flex-shrink-0">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/15 flex items-center justify-center text-white">
                 <ShieldCheck className="w-6 h-6" strokeWidth={2} />
               </div>
-              <span className="font-display text-[#2c5325] font-bold text-[14px] md:text-[16px] tracking-wide uppercase leading-tight">
+              <span className="font-display text-white font-bold text-[14px] md:text-[16px] tracking-wide uppercase leading-tight">
                 YOUR PRODUCT IS AUTHENTIC & TESTED
               </span>
             </div>
