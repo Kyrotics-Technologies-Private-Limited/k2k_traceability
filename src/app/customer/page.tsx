@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
