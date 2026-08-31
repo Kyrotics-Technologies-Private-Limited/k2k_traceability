@@ -38,7 +38,7 @@ export function DeleteBatchDialog({
           {hasReports ? (
             <>
               <p className="text-gray-600 dark:text-gray-300 font-medium">
-                This batch has refractometer report. Are you sure you want to delete this batch?
+                This batch has refractometer test value. Are you sure you want to delete this batch?
               </p>
               <p className="text-sm text-red-500 mt-3 font-semibold bg-red-50 dark:bg-red-950/30 p-3 rounded-lg border border-red-100 dark:border-red-900/30">
                 Warning: Deleting this batch will permanently remove all associated reporting data,

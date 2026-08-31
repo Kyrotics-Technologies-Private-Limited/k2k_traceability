@@ -66,7 +66,7 @@ export function BatchDetailsHeader({
                 className="flex items-center gap-2 text-green-600 border-green-300 hover:bg-green-50"
               >
                 <UploadCloud className="w-4 h-4" />
-                Upload Report
+                Upload Lab Report
               </Button>
             )}
             <Button

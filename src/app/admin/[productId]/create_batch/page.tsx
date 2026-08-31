@@ -45,7 +45,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   const [productDetails, setProductDetails] = useState<ProductDetails | null>(
     null
   );
-  const [quantity, setQuantity] = useState("");
+
   const [testReport, setTestReport] = useState<File | null>(null);
   const [batchNo, setBatchNo] = useState("");
   // const [testReportUrl, setTestReportUrl] = useState<string | null>("");
@@ -78,9 +78,9 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
         Math.max(
           ...batches.map((batch) => parseInt(batch.batchNo || "0", 10))
         ) || 0;
-      setBatchNo((lastBatchNo + 1).toString().padStart(4, "0"));
+      setBatchNo((lastBatchNo + 1).toString().padStart(5, "0"));
     } else {
-      setBatchNo("0001");
+      setBatchNo("00001");
     }
     setOpen(true);
   };
@@ -90,14 +90,13 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
     setIsCreating(true);
     try {
       const created = await adminCreateBatch(user, productId, {
-        limitQuantity: Number(quantity),
+        limitQuantity: 0,
         testReport,
       });
       setBatches([
         ...batches,
-        { id: created.batchId, batchNo: created.batchNo, quantity: Number(quantity) },
+        { id: created.batchId, batchNo: created.batchNo, quantity: 0 },
       ]);
-      setQuantity("");
       setTestReport(null);
       setOpen(false);
     } catch (error) {
@@ -215,7 +214,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                                 <p className="font-semibold text-gray-900 dark:text-gray-50">
                                   Batch{" "}
                                   {batch.batchNo ||
-                                    `${index + 1}`.padStart(4, "0")}
+                                    `${index + 1}`.padStart(5, "0")}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                   Quantity: {batch.quantity || "N/A"}
@@ -245,26 +244,11 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <label
-                htmlFor="quantity"
-                className="text-sm font-medium text-gray-900 dark:text-gray-100"
-              >
-                Maximum Batch Size
-              </label>
-              <Input
-                id="quantity"
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                className="border-gray-200 dark:border-gray-700"
-                required
-              />
-            </div>
+
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Test Report
+                Attach Lab Test Report
               </label>
               <div
                 className={`border-2 border-dashed rounded-lg p-6 transition-colors ${dragActive

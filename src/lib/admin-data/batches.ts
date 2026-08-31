@@ -51,7 +51,7 @@ export async function addBatchToProduct(input: {
       .collection("batches");
 
     const latest = await batchCollectionRef.orderBy("batchNo", "desc").limit(1).get();
-    let newBatchNo = "0001";
+    let newBatchNo = "00001";
     if (!latest.empty) {
       const lastBatchNo = parseInt(String(latest.docs[0].data().batchNo), 10);
       newBatchNo = padBatch(lastBatchNo + 1);

@@ -12,6 +12,8 @@ import Link from "next/link";
 
 const CustomerSearch = () => {
   const [serialNo, setSerialNo] = useState<string>("");
+
+
   const router = useRouter();
 
   const handleSearch = () => {
@@ -23,11 +25,7 @@ const CustomerSearch = () => {
     router.push(`/customer/${trimmedSerialNo}`);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
+
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -85,16 +83,62 @@ const CustomerSearch = () => {
 
               {/* Search Input */}
               <div className="space-y-4">
-                <div className="relative">
+                <div className="flex items-center justify-center gap-2 md:gap-4">
                   <Input
+                    id="part1"
                     type="text"
-                    className="pl-4 pr-12 py-6 text-lg font-light border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600"
-                    value={serialNo}
-                    onChange={(e) => setSerialNo(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Enter Bottle Number/Jar Number "
+                    className="w-24 text-center py-6 text-xl font-light border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600 uppercase"
+                    value={serialNo.split("-")[0] || ""}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+                      const parts = serialNo.split("-");
+                      setSerialNo(`${val}-${parts[1] || ""}-${parts[2] || ""}`);
+                      if (val.length === 3) document.getElementById("part2")?.focus();
+                    }}
+                    placeholder="001"
+                    maxLength={3}
                   />
-                  <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <span className="text-gray-400 font-light text-2xl">-</span>
+                  <Input
+                    id="part2"
+                    type="text"
+                    className="w-32 text-center py-6 text-xl font-light border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600 uppercase"
+                    value={serialNo.split("-")[1] || ""}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+                      const parts = serialNo.split("-");
+                      setSerialNo(`${parts[0] || ""}-${val}-${parts[2] || ""}`);
+                      if (val.length === 5) document.getElementById("part3")?.focus();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Backspace" && !serialNo.split("-")[1]) {
+                        document.getElementById("part1")?.focus();
+                      }
+                    }}
+                    placeholder="00001"
+                    maxLength={5}
+                  />
+                  <span className="text-gray-400 font-light text-2xl">-</span>
+                  <Input
+                    id="part3"
+                    type="text"
+                    className="w-32 text-center py-6 text-xl font-light border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600 uppercase"
+                    value={serialNo.split("-")[2] || ""}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+                      const parts = serialNo.split("-");
+                      setSerialNo(`${parts[0] || ""}-${parts[1] || ""}-${val}`);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Backspace" && !serialNo.split("-")[2]) {
+                        document.getElementById("part2")?.focus();
+                      } else if (e.key === "Enter") {
+                        handleSearch();
+                      }
+                    }}
+                    placeholder="00001"
+                    maxLength={5}
+                  />
                 </div>
                 
                 <Button 

@@ -100,7 +100,7 @@ export function PacketInventoryTable({
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Refractometer Report
+                  Refractometer Test Value
                 </th>
                 <th className="px-6 py-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
                   Actions
