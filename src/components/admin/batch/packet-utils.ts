@@ -6,12 +6,15 @@ import type {
   SortKey,
 } from "./types";
 
-export function formatSerialNo(serialNo: string | undefined, productCategoryId: string): string {
-  if (!serialNo) return "N/A";
-  if (serialNo.startsWith("undefined")) {
-    return serialNo.replace("undefined", productCategoryId);
+export function formatBottleNo(bottleNo: string | undefined, productCategoryId: string): string {
+  if (!bottleNo) return "N/A";
+  if (bottleNo.startsWith("undefined-")) {
+    return bottleNo.replace("undefined-", `${productCategoryId}-`);
   }
-  return serialNo;
+  if (bottleNo.startsWith("undefined")) {
+    return bottleNo.replace("undefined", productCategoryId);
+  }
+  return bottleNo;
 }
 
 export function hasRefractometerReport(value: string | undefined): boolean {
@@ -39,12 +42,14 @@ export function filterAndSortPackets(
   if (options.searchQuery.trim() !== "") {
     const q = options.searchQuery.toLowerCase().trim();
     result = result.filter((p) => {
-      const serial = (p.serialNo || "").toLowerCase();
+      const bottle = (p.bottleNo || p.serialNo || "").toLowerCase();
       const packetNo = (p.packetNo || "").toLowerCase();
-      const serialPadded = serial.startsWith("undefined")
-        ? serial.replace("undefined", options.productCategoryId.toLowerCase())
-        : serial;
-      return serialPadded.includes(q) || packetNo.includes(q);
+      const bottlePadded = bottle.startsWith("undefined-")
+        ? bottle.replace("undefined-", `${options.productCategoryId.toLowerCase()}-`)
+        : bottle.startsWith("undefined")
+        ? bottle.replace("undefined", options.productCategoryId.toLowerCase())
+        : bottle;
+      return bottlePadded.includes(q) || packetNo.includes(q);
     });
   }
 
@@ -55,9 +60,9 @@ export function filterAndSortPackets(
       return aNum - bNum;
     }
 
-    if (options.sortKey === "serialNo") {
-      const aValue = a.serialNo?.toLowerCase() || "";
-      const bValue = b.serialNo?.toLowerCase() || "";
+    if (options.sortKey === "bottleNo") {
+      const aValue = (a.bottleNo || a.serialNo || "").toLowerCase();
+      const bValue = (b.bottleNo || b.serialNo || "").toLowerCase();
       if (aValue < bValue) return options.sortDirection === "asc" ? -1 : 1;
       if (aValue > bValue) return options.sortDirection === "asc" ? 1 : -1;
     }
@@ -73,7 +78,8 @@ export function exportPacketsToExcel(
 ): void {
   const data = packets.map((pkg, index) => ({
     No: index + 1,
-    "Serial Number": formatSerialNo(pkg.serialNo, productCategoryId),
+    "Batch No": batchLabel,
+    "Bottle Number": formatBottleNo(pkg.bottleNo || pkg.serialNo, productCategoryId),
     "Refractometer Report": pkg.refractometerReport || "",
   }));
 

@@ -31,10 +31,15 @@ export function RefractometerIndexDialog({
   onSave,
   isSaving,
 }: Props) {
-  const displaySerial =
-    packet?.serialNo?.startsWith("undefined")
-      ? packet.serialNo.replace("undefined", productCategoryId)
-      : packet?.serialNo;
+  const displayBottleNo =
+    packet?.bottleNo?.startsWith("undefined-")
+      ? packet.bottleNo.replace("undefined-", `${productCategoryId}-`)
+      : packet?.bottleNo?.startsWith("undefined")
+      ? packet.bottleNo.replace("undefined", productCategoryId)
+      : packet?.bottleNo ||
+        (packet?.serialNo?.startsWith("undefined")
+          ? packet.serialNo.replace("undefined", productCategoryId)
+          : packet?.serialNo);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -47,9 +52,9 @@ export function RefractometerIndexDialog({
         </DialogHeader>
         <div className="py-4 space-y-4">
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Serial Number</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Bottle Number</p>
             <p className="font-mono font-medium text-gray-900 dark:text-gray-100">
-              {displaySerial}
+              {displayBottleNo || "N/A"}
             </p>
           </div>
           <div className="space-y-2">

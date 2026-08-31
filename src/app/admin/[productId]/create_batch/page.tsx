@@ -51,6 +51,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
   // const [testReportUrl, setTestReportUrl] = useState<string | null>("");
   const [dragActive, setDragActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
 
   const { productId } = params;
 
@@ -77,15 +78,16 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
         Math.max(
           ...batches.map((batch) => parseInt(batch.batchNo || "0", 10))
         ) || 0;
-      setBatchNo((lastBatchNo + 1).toString().padStart(3, "0"));
+      setBatchNo((lastBatchNo + 1).toString().padStart(4, "0"));
     } else {
-      setBatchNo("001");
+      setBatchNo("0001");
     }
     setOpen(true);
   };
 
   const handleCreateBatch = async () => {
-    if (!user) return;
+    if (!user || isCreating) return;
+    setIsCreating(true);
     try {
       const created = await adminCreateBatch(user, productId, {
         limitQuantity: Number(quantity),
@@ -100,6 +102,8 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
       setOpen(false);
     } catch (error) {
       console.error("Failed to create batch:", error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -211,7 +215,7 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
                                 <p className="font-semibold text-gray-900 dark:text-gray-50">
                                   Batch{" "}
                                   {batch.batchNo ||
-                                    `${index + 1}`.padStart(3, "0")}
+                                    `${index + 1}`.padStart(4, "0")}
                                 </p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                   Quantity: {batch.quantity || "N/A"}
@@ -307,14 +311,15 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={isCreating}>
               Cancel
             </Button>
             <Button
               onClick={handleCreateBatch}
+              disabled={isCreating}
               className="bg-green-600 hover:bg-green-700 text-white"
             >
-              Create Batch
+              {isCreating ? "Creating..." : "Create Batch"}
             </Button>
           </DialogFooter>
         </DialogContent>

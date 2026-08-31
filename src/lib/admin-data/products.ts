@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { admin } from "@/lib/firebase-admin";
-import { pad3 } from "@/lib/format";
+import { padProduct } from "@/lib/format";
 import { uploadAdminFile } from "./storage";
 import type { ProductCategory, ServiceResult } from "./types";
 
@@ -61,7 +61,7 @@ export async function addProduct(input: {
     let newProductCategoryId = "";
 
     if (input.customProductCategoryId?.trim()) {
-      newProductCategoryId = pad3(input.customProductCategoryId);
+      newProductCategoryId = padProduct(input.customProductCategoryId);
       const duplicate = await productCategoryRef
         .where("productCategoryId", "==", newProductCategoryId)
         .limit(1)
@@ -77,7 +77,7 @@ export async function addProduct(input: {
       newProductCategoryId = "001";
       if (!latest.empty) {
         const lastId = parseInt(String(latest.docs[0].data().productCategoryId), 10);
-        newProductCategoryId = pad3(lastId + 1);
+        newProductCategoryId = padProduct(lastId + 1);
       }
     }
 

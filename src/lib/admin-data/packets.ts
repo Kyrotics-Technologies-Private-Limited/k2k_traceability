@@ -1,5 +1,5 @@
 import { admin } from "@/lib/firebase-admin";
-import { pad3 } from "@/lib/format";
+import { padBottle } from "@/lib/format";
 import type { AdminPacket, ServiceResult } from "./types";
 
 function db() {
@@ -36,13 +36,15 @@ export async function listPackets(
 
   return snap.docs.map((docSnap) => {
     const data = docSnap.data();
-    let serialNo = data.serialNo as string | undefined;
-    if (serialNo?.startsWith("undefined")) {
-      serialNo = serialNo.replace("undefined", productNo);
+    let bottleNo = (data.bottleNo || data.serialNo) as string | undefined;
+    if (bottleNo?.startsWith("undefined-")) {
+      bottleNo = bottleNo.replace("undefined-", `${productNo}-`);
+    } else if (bottleNo?.startsWith("undefined")) {
+      bottleNo = bottleNo.replace("undefined", productNo);
     }
     return {
       id: docSnap.id,
-      serialNo,
+      bottleNo,
       packetNo: data.packetNo as string | undefined,
       refractometerReport: data.refractometerReport as string | undefined,
     };
@@ -73,24 +75,24 @@ export async function addPacketToBatch(input: {
 
     const packetCollectionRef = batchRef.collection("packets");
     const latest = await packetCollectionRef.orderBy("packetNo", "desc").limit(1).get();
-    let newPacketNo = "001";
+    let newPacketNo = "00001";
     if (!latest.empty) {
       const lastPacketNo = parseInt(String(latest.docs[0].data().packetNo), 10);
-      newPacketNo = pad3(lastPacketNo + 1);
+      newPacketNo = padBottle(lastPacketNo + 1);
     }
 
-    const serialNo = `${productNo}${batchNo}${newPacketNo}`;
+    const bottleNo = `${productNo}-${batchNo}-${newPacketNo}`;
     const packetRef = await packetCollectionRef.add({
       packetNo: newPacketNo,
-      serialNo,
+      bottleNo,
       refractometerReport: input.refractometerReport,
     });
 
-    await db().collection("serialNumbers").doc(serialNo).set({
+    await db().collection("bottleNumbers").doc(bottleNo).set({
       productCategoryId: input.productId,
       batchId: input.batchId,
       packetId: packetRef.id,
-      serialNo,
+      bottleNo,
     });
 
     currentQuantity += 1;
@@ -136,20 +138,20 @@ export async function generatePackets(input: {
 
     const packetIds: string[] = [];
     for (let i = 1; i <= input.quantity; i++) {
-      const newPacketNo = pad3(lastPacketNo + i);
-      const serialNo = `${productNo}${batchNo}${newPacketNo}`;
+      const newPacketNo = padBottle(lastPacketNo + i);
+      const bottleNo = `${productNo}-${batchNo}-${newPacketNo}`;
 
       const packetRef = await packetCollectionRef.add({
         packetNo: newPacketNo,
         refractometerReport: "",
-        serialNo,
+        bottleNo,
       });
 
-      await db().collection("serialNumbers").doc(serialNo).set({
+      await db().collection("bottleNumbers").doc(bottleNo).set({
         productCategoryId: input.productId,
         batchId: input.batchId,
         packetId: packetRef.id,
-        serialNo,
+        bottleNo,
       });
 
       packetIds.push(packetRef.id);
@@ -188,38 +190,44 @@ export async function updateRefractometerReportById(input: {
     }
 
     const packetData = packetSnap.data()!;
-    const currentSerialNo = packetData.serialNo as string | undefined;
-    let newSerialNo = currentSerialNo;
+    const currentBottleNo = (packetData.bottleNo || packetData.serialNo) as string | undefined;
+    let newBottleNo = currentBottleNo;
 
-    if (!currentSerialNo || currentSerialNo.startsWith("undefined")) {
+    if (!currentBottleNo || currentBottleNo.startsWith("undefined")) {
       const productNo = await getProductNo(input.productId);
       const batchNo = await getBatchNo(input.productId, input.batchId);
       const packetNo = packetData.packetNo as string | undefined;
       if (productNo && batchNo && packetNo) {
-        newSerialNo = `${productNo}${batchNo}${packetNo}`;
+        if (packetNo.length > 3 || packetNo.includes("-")) {
+          newBottleNo = `${productNo}-${batchNo}-${packetNo}`;
+        } else {
+          newBottleNo = `${productNo}${batchNo}${packetNo}`;
+        }
       }
     }
 
     const updateData: Record<string, string> = {
       refractometerReport: input.refractometerReport,
     };
-    if (newSerialNo && newSerialNo !== currentSerialNo) {
-      updateData.serialNo = newSerialNo;
+    if (newBottleNo && newBottleNo !== currentBottleNo) {
+      updateData.bottleNo = newBottleNo;
     }
 
     await packetRef.update(updateData);
 
-    if (newSerialNo) {
-      await db().collection("serialNumbers").doc(newSerialNo).set({
+    if (newBottleNo) {
+      const collectionName = newBottleNo.includes("-") ? "bottleNumbers" : "serialNumbers";
+      await db().collection(collectionName).doc(newBottleNo).set({
         productCategoryId: input.productId,
         batchId: input.batchId,
         packetId: input.packetId,
-        serialNo: newSerialNo,
+        bottleNo: newBottleNo,
       });
 
-      if (currentSerialNo && currentSerialNo !== newSerialNo) {
+      if (currentBottleNo && currentBottleNo !== newBottleNo) {
         try {
-          await db().collection("serialNumbers").doc(currentSerialNo).delete();
+          const oldCollectionName = currentBottleNo.includes("-") ? "bottleNumbers" : "serialNumbers";
+          await db().collection(oldCollectionName).doc(currentBottleNo).delete();
         } catch {
           // ignore missing legacy index
         }

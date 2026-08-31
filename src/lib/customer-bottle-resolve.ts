@@ -1,8 +1,7 @@
 import type { DocumentSnapshot, Firestore } from "firebase-admin/firestore";
-import { pad3 } from "@/lib/format";
 
-export interface CustomerSerialDetails {
-  serialNo: string;
+export interface CustomerBottleDetails {
+  bottleNo: string;
   productName?: string;
   productDetails?: string;
   description?: string;
@@ -12,37 +11,54 @@ export interface CustomerSerialDetails {
   refractometerReport?: string;
 }
 
-async function resolveSerialIndexDoc(
+async function resolveBottleIndexDoc(
   db: Firestore,
-  serialNo: string
+  bottleNo: string
 ): Promise<DocumentSnapshot | null> {
-  const direct = await db.collection("serialNumbers").doc(serialNo).get();
-  if (direct.exists) return direct;
+  const directNew = await db.collection("bottleNumbers").doc(bottleNo).get();
+  if (directNew.exists) return directNew;
+
+  const directOld = await db.collection("serialNumbers").doc(bottleNo).get();
+  if (directOld.exists) return directOld;
 
   const categoriesSnap = await db.collection("productCategory").get();
   for (const categoryDoc of categoriesSnap.docs) {
-    const categoryCode = pad3(categoryDoc.data().productCategoryId as string | undefined);
-    if (!categoryCode || !serialNo.startsWith(categoryCode)) continue;
+    const categoryCode = String(categoryDoc.data().productCategoryId || "");
+    if (!categoryCode) continue;
 
-    const fallbackSerial = serialNo.replace(categoryCode, "undefined");
-    const fallbackSnap = await db.collection("serialNumbers").doc(fallbackSerial).get();
-    if (fallbackSnap.exists) return fallbackSnap;
+    if (bottleNo.includes("-")) {
+      if (bottleNo.startsWith(`${categoryCode}-`)) {
+        const fallbackBottle = bottleNo.replace(`${categoryCode}-`, "undefined-");
+        const fallbackSnapNew = await db.collection("bottleNumbers").doc(fallbackBottle).get();
+        if (fallbackSnapNew.exists) return fallbackSnapNew;
+        const fallbackSnapOld = await db.collection("serialNumbers").doc(fallbackBottle).get();
+        if (fallbackSnapOld.exists) return fallbackSnapOld;
+      }
+    } else {
+      if (bottleNo.startsWith(categoryCode)) {
+        const fallbackBottle = bottleNo.replace(categoryCode, "undefined");
+        const fallbackSnapNew = await db.collection("bottleNumbers").doc(fallbackBottle).get();
+        if (fallbackSnapNew.exists) return fallbackSnapNew;
+        const fallbackSnapOld = await db.collection("serialNumbers").doc(fallbackBottle).get();
+        if (fallbackSnapOld.exists) return fallbackSnapOld;
+      }
+    }
   }
 
   return null;
 }
 
 /**
- * Resolve a bottle serial via serialNumbers index → nested productCategory/batches/packets.
+ * Resolve a bottle serial via index → nested productCategory/batches/packets.
  */
-export async function resolveCustomerSerialDetails(
+export async function resolveCustomerBottleDetails(
   db: Firestore,
-  rawSerialNo: string
-): Promise<CustomerSerialDetails | null> {
-  const serialNo = rawSerialNo.trim();
-  if (!serialNo) return null;
+  rawBottleNo: string
+): Promise<CustomerBottleDetails | null> {
+  const bottleNo = rawBottleNo.trim();
+  if (!bottleNo) return null;
 
-  const indexSnap = await resolveSerialIndexDoc(db, serialNo);
+  const indexSnap = await resolveBottleIndexDoc(db, bottleNo);
   if (!indexSnap?.exists) return null;
 
   const index = indexSnap.data() as {
@@ -78,7 +94,7 @@ export async function resolveCustomerSerialDetails(
   const packet = packetSnap.data()!;
 
   return {
-    serialNo,
+    bottleNo,
     productName: product.productName as string | undefined,
     productDetails: product.productDetails as string | undefined,
     description: product.description as string | undefined,

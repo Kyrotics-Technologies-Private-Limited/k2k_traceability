@@ -8,11 +8,12 @@ export interface BatchData {
 
 export interface PacketDetails {
   id: string;
+  bottleNo?: string;
   serialNo?: string;
   packetNo?: string;
   refractometerReport?: string;
 }
 
-export type SortKey = "no" | "serialNo" | null;
+export type SortKey = "no" | "bottleNo" | null;
 export type SortDirection = "asc" | "desc";
 export type PacketFilterType = "all" | "missing" | "completed";

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin } from "@/lib/firebase-admin";
-import { resolveCustomerSerialDetails } from "@/lib/customer-serial-resolve";
+import { resolveCustomerBottleDetails } from "@/lib/customer-bottle-resolve";
 
 /**
  * Public serial lookup via serialNumbers → nested productCategory/batches/packets.
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const data = await resolveCustomerSerialDetails(admin.firestore(), serial);
+    const data = await resolveCustomerBottleDetails(admin.firestore(), serial);
     if (!data) {
       return NextResponse.json({ error: "Serial number not found" }, { status: 404 });
     }

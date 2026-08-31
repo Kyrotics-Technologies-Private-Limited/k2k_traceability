@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 
 const CustomerSearch = () => {
   const [serialNo, setSerialNo] = useState<string>("");
@@ -33,14 +34,16 @@ const CustomerSearch = () => {
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <div className="flex justify-center mb-6">
-            <Image
-              src="/images/univillage-logo.jpeg"
-              alt="UniVillage Logo"
-              width={160}
-              height={160}
-              className="object-contain rounded-xl shadow-sm"
-              priority
-            />
+            <Link href="/" className="cursor-pointer">
+              <Image
+                src="/images/univillage-logo.jpeg"
+                alt="UniVillage Logo"
+                width={160}
+                height={160}
+                className="object-contain rounded-xl shadow-sm hover:opacity-90 transition-opacity"
+                priority
+              />
+            </Link>
           </div>
           
           <h1 className="font-display text-4xl font-bold mb-4 text-gray-900 dark:text-gray-50">

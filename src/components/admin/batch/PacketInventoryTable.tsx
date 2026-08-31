@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, Plus, Search } from "lucide-react";
-import { formatSerialNo, hasRefractometerReport } from "./packet-utils";
+import { formatBottleNo, hasRefractometerReport } from "./packet-utils";
 import type { PacketDetails, PacketFilterType, SortDirection, SortKey } from "./types";
 
 interface Props {
@@ -87,11 +87,11 @@ export function PacketInventoryTable({
                 </th>
                 <th
                   className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400 cursor-pointer"
-                  onClick={() => onSort("serialNo")}
+                  onClick={() => onSort("bottleNo")}
                 >
                   <div className="flex items-center gap-2">
-                    Serial Number
-                    {sortKey === "serialNo" &&
+                    Bottle Number
+                    {sortKey === "bottleNo" &&
                       (sortDirection === "asc" ? (
                         <ArrowUp className="w-4 h-4" />
                       ) : (
@@ -118,8 +118,10 @@ export function PacketInventoryTable({
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                       {index + 1}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                      {formatSerialNo(packet.serialNo, productCategoryId)}
+                    <td className="px-6 py-4">
+                      <span className="font-mono text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {formatBottleNo(packet.bottleNo || packet.serialNo, productCategoryId)}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                       {packet.refractometerReport || "N/A"}

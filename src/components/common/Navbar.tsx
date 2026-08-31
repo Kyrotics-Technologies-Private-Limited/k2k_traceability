@@ -30,7 +30,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="flex items-center">
+              <Link href={pathname?.startsWith('/admin') ? '/admin' : '/'} className="flex items-center">
                 <div className="relative md:h-20 sm:h-16 h-12 md:w-20 sm:w-16 w-12">
                   <Image
                     src="/images/univillage-logo.jpeg"

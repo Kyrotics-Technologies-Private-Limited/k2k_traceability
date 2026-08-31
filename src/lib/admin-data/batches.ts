@@ -1,7 +1,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { randomUUID } from "crypto";
 import { admin } from "@/lib/firebase-admin";
-import { pad3 } from "@/lib/format";
+import { padBatch } from "@/lib/format";
 import { uploadAdminFile } from "./storage";
 import type { AdminBatch, ServiceResult } from "./types";
 
@@ -51,10 +51,10 @@ export async function addBatchToProduct(input: {
       .collection("batches");
 
     const latest = await batchCollectionRef.orderBy("batchNo", "desc").limit(1).get();
-    let newBatchNo = "001";
+    let newBatchNo = "0001";
     if (!latest.empty) {
       const lastBatchNo = parseInt(String(latest.docs[0].data().batchNo), 10);
-      newBatchNo = pad3(lastBatchNo + 1);
+      newBatchNo = padBatch(lastBatchNo + 1);
     }
 
     let reportUrl = "";
@@ -138,9 +138,13 @@ export async function deleteBatch(
 
     for (const packetDoc of packetsSnap.docs) {
       const serialNo = packetDoc.data().serialNo as string | undefined;
+      const bottleNo = packetDoc.data().bottleNo as string | undefined;
       writeBatch.delete(packetDoc.ref);
       if (serialNo) {
         writeBatch.delete(db().collection("serialNumbers").doc(serialNo));
+      }
+      if (bottleNo) {
+        writeBatch.delete(db().collection("bottleNumbers").doc(bottleNo));
       }
     }
 
