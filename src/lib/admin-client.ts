@@ -99,10 +99,9 @@ export async function adminFetchBatches(
 export async function adminCreateBatch(
   user: User | null,
   productId: string,
-  input: { limitQuantity: number; testReport?: File | null }
+  input: { testReport?: File | null }
 ): Promise<{ batchId: string; batchNo: string }> {
   const formData = new FormData();
-  formData.set("limitQuantity", String(input.limitQuantity));
   if (input.testReport) formData.set("testReport", input.testReport);
 
   const response = await fetch(`/api/admin/products/${productId}/batches`, {

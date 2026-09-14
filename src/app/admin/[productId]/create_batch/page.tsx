@@ -90,7 +90,6 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
     setIsCreating(true);
     try {
       const created = await adminCreateBatch(user, productId, {
-        limitQuantity: 0,
         testReport,
       });
       setBatches([
@@ -244,7 +243,6 @@ const BatchesPage: React.FC<Props> = ({ params }) => {
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900 dark:text-gray-100">

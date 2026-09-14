@@ -39,7 +39,6 @@ export async function getBatchDetails(
 
 export async function addBatchToProduct(input: {
   productId: string;
-  limitQuantity: number;
   testReport?: Buffer | null;
   testReportName?: string | null;
   testReportType?: string | null;
@@ -69,7 +68,6 @@ export async function addBatchToProduct(input: {
 
     const batchRef = await batchCollectionRef.add({
       batchNo: newBatchNo,
-      limitQuantity: input.limitQuantity,
       testReport: reportUrl,
     });
 
