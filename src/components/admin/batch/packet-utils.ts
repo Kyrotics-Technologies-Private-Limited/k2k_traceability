@@ -79,7 +79,7 @@ export function exportPacketsToExcel(
 ): void {
   const data = packets.map((pkg, index) => ({
     No: index + 1,
-    "Batch No": `'${batchLabel}`,
+    "Batch No": batchLabel,
     "Bottle Number": formatBottleNo(pkg.bottleNo || pkg.serialNo, productCategoryId),
     "Refractometer Test Value": pkg.refractometerReport || "",
   }));
