@@ -74,7 +74,8 @@ export function filterAndSortPackets(
 export function exportPacketsToExcel(
   packets: PacketDetails[],
   productCategoryId: string,
-  batchLabel: string
+  batchLabel: string,
+  productName: string
 ): void {
   const data = packets.map((pkg, index) => ({
     No: index + 1,
@@ -91,7 +92,7 @@ export function exportPacketsToExcel(
   const url = window.URL.createObjectURL(dataBlob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `Batch_${batchLabel}.xlsx`;
+  link.download = `${productName}_Batch_${batchLabel}.xlsx`;
   link.click();
   window.URL.revokeObjectURL(url);
 }

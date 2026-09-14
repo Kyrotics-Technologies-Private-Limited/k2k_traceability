@@ -145,7 +145,8 @@ export function useBatchDetails({ user, productId, batchId }: UseBatchDetailsOpt
     exportPacketsToExcel(
       filteredAndSortedPackets,
       productCategoryId,
-      batchDetails?.batchNo || batchId
+      batchDetails?.batchNo || batchId,
+      productName
     );
   };
 
