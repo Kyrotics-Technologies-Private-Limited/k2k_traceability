@@ -12,7 +12,7 @@ body {
   }
 
   .portal-shell {
-    @apply min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-950;
+    @apply min-h-screen flex flex-col relative overflow-x-hidden bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-950;
   }
 
   .portal-pattern {

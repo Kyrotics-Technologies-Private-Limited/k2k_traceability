@@ -44,7 +44,7 @@ export default function RootLayout({
           <Navbar />
 
           {/* Main Content */}
-          <main className="relative z-10 w-full flex-grow mx-auto sm:px-0 lg:px-0 overflow-y-hidden">
+          <main className="relative z-10 w-full flex-grow mx-auto sm:px-0 lg:px-0 min-h-0">
             {children}
           </main>
         </div>
