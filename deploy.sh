@@ -10,6 +10,7 @@ gcloud run deploy univillage-traceability \
   --port 8080 \
   --memory 512Mi \
   --max-instances 1 \
-  --min-instances 0
+  --min-instances 0 \
+  --set-env-vars FIREBASE_PROJECT_ID=univillage-503009
 
 echo "Deployment finished!"

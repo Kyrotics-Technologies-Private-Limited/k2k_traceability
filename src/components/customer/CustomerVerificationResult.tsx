@@ -8,13 +8,6 @@ import { Button } from "@/components/ui/button";
 import type { CustomerPacketDetails } from "./useCustomerSerialDetails";
 import { getPurityReportDetails } from "./purity-report";
 
-const QUALITY_REMARKS = [
-  "Adulteration free",
-  "Chemical free",
-  "Natural",
-  
-] as const;
-
 interface CustomerVerificationResultProps {
   serialNo: string;
   packetDetails: CustomerPacketDetails;
@@ -26,6 +19,10 @@ export function CustomerVerificationResult({
 }: CustomerVerificationResultProps) {
   const router = useRouter();
   const purityInfo = getPurityReportDetails(packetDetails.productName);
+  const qualityRemarks = [
+   
+    "Within the standard purity range",
+  ] as const;
 
   return (
     <div className="min-h-screen w-full max-w-full flex flex-col bg-gradient-to-br from-[#f8faf6] via-[#f3f7f1] to-[#eaf2e8] text-gray-900 p-3 sm:p-5 md:p-6 lg:p-8 overflow-x-hidden overflow-y-auto box-border font-sans">
@@ -154,7 +151,7 @@ export function CustomerVerificationResult({
                           </td>
                           <td className="py-2.5 sm:py-3 px-2.5 sm:px-3 align-middle w-[34%]">
                             <ul className="space-y-1 sm:space-y-1.5">
-                              {QUALITY_REMARKS.map((remark) => (
+                              {qualityRemarks.map((remark) => (
                                 <li
                                   key={remark}
                                   className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#2c5325] whitespace-nowrap"
@@ -252,7 +249,7 @@ function CustomerTrustIndicators() {
               <TestTube2 className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.75} />
             </div>
             <span className="font-display text-xs sm:text-sm md:text-base font-bold text-[#2c5325] leading-snug min-w-0">
-              Every Bottle<br />Lab Tested
+              Every Bottle<br />Tested
             </span>
           </div>
 
@@ -270,7 +267,7 @@ function CustomerTrustIndicators() {
               <Leaf className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.75} />
             </div>
             <span className="font-display text-xs sm:text-sm md:text-base font-bold text-[#2c5325] leading-snug min-w-0">
-              Pure. Natural.<br />Trustworthy.
+              No Added<br />Preservatives
             </span>
           </div>
 
@@ -279,7 +276,7 @@ function CustomerTrustIndicators() {
               <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.75} />
             </div>
             <span className="font-display text-xs sm:text-sm md:text-base font-bold text-[#2c5325] leading-snug min-w-0">
-              Trust isn&apos;t claimed.<br />It&apos;s proven.
+              Traditionally<br />Made
             </span>
           </div>
         </div>

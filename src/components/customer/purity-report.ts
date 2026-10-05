@@ -12,15 +12,15 @@ export function getPurityReportDetails(productName?: string): PurityReportInfo {
       parameter: "Refractor meter test value",
       standardRange: "2.3 - 2.8",
       rangeLabel: "STANDARD RANGE (Pure Mustard Oil)",
-      remarks: "Adulteration Free",
+      remarks: "Purity range: 2.3 - 2.8",
     };
   }
   if (name.includes("ghee")) {
     return {
-      parameter: "Butyro-refractometer (BR) value",
+      parameter: "Butyro-refractometer (BR) value at 40°C",
       standardRange: "40.0 - 45.0",
       rangeLabel: "STANDARD RANGE (Pure Cow Ghee)",
-      remarks: "Adulteration Free",
+      remarks: "Purity range: 40.0 - 45.0",
     };
   }
   if (name.includes("honey")) {
@@ -28,13 +28,13 @@ export function getPurityReportDetails(productName?: string): PurityReportInfo {
       parameter: "Moisture content (%)",
       standardRange: "17.0 - 20.0",
       rangeLabel: "STANDARD RANGE (Pure Honey)",
-      remarks: "Adulteration Free",
+      remarks: "Purity range: 17.0 - 20.0",
     };
   }
   return {
     parameter: "Refractor meter test value",
     standardRange: "2.3 - 2.8",
     rangeLabel: productName ? `STANDARD RANGE (Pure ${productName})` : "STANDARD RANGE",
-    remarks: "Adulteration Free",
+    remarks: "Purity range: 2.3 - 2.8",
   };
 }

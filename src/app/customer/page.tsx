@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 
-const CustomerSearch = () => {
+const CustomerSearchContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
@@ -121,7 +121,7 @@ const CustomerSearch = () => {
               {/* Search Input */}
               <div className="space-y-4">
                 <label className="block text-center text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
-                  Enter the Serial Number on your bottle / pack:
+                  Enter the Serial Number on your bottle / jar:
                 </label>
                 <div className="flex items-center justify-center gap-1.5 sm:gap-3 w-full">
                   <Input
@@ -196,4 +196,10 @@ const CustomerSearch = () => {
   );
 };
 
-export default CustomerSearch;
+export default function CustomerSearch() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-slate-900" />}>
+      <CustomerSearchContent />
+    </Suspense>
+  );
+}
