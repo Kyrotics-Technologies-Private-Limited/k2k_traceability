@@ -7,12 +7,12 @@ export interface PurityReportInfo {
 
 export function getPurityReportDetails(productName?: string): PurityReportInfo {
   const name = productName?.toLowerCase() || "";
-  if (name.includes("mustard")) {
+  if (name.includes("mustard") || name.includes("musturd")) {
     return {
       parameter: "Refractor meter test value",
-      standardRange: "2.3 - 2.8",
+      standardRange: "58.0 - 60.5",
       rangeLabel: "STANDARD RANGE (Pure Mustard Oil)",
-      remarks: "Purity range: 2.3 - 2.8",
+      remarks: "Purity range: 58.0 - 60.5",
     };
   }
   if (name.includes("ghee")) {

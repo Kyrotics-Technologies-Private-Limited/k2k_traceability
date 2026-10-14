@@ -151,7 +151,7 @@ export async function resolveCustomerBottleDetails(
       const allProducts = await db.collection("productCategory").get();
       for (const pDoc of allProducts.docs) {
         const pData = pDoc.data();
-        const pCatId = String(pData.productCategoryId ?? "");
+        const pCatId = String(pData.productCategoryId ?? "").trim();
         if (
           pCatId === productPart ||
           pCatId === paddedProduct ||
@@ -241,7 +241,8 @@ export async function resolveCustomerBottleDetails(
 
   const packetData = targetPacketDoc?.data() ?? {};
   const resolvedBatchNo = (batchData.batchNo as string) || (batchPart ? padBatch(batchPart) : "00001");
-  const resolvedProductCode = (product.productCategoryId as string) || padProduct(productPart);
+  const resolvedProductCode =
+    String(product.productCategoryId ?? "").trim() || padProduct(productPart);
   const resolvedPacketNo = (packetData.packetNo as string) || (packetPart ? padBottle(packetPart) : "00001");
   const displayBottleNo = cleanBottleNo.includes("-")
     ? cleanBottleNo
