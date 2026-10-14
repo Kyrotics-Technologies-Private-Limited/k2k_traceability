@@ -70,6 +70,27 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
    - Go to Authentication → Users
    - Add users manually or use the sign-up flow
 
+## Create or Update the Admin Account
+
+Run `node scripts/update-admin-user.cjs` from the project root. The script creates
+the Firebase Authentication user if it does not exist, updates its password if it
+does, and sets its Firestore role and Firebase custom claim to `admin`.
+
+Provide credentials at runtime; do not put the password in the script or commit it:
+
+```powershell
+$env:ADMIN_EMAIL = "admin@gmail.com"
+$env:ADMIN_PASSWORD = "your-temporary-password"
+$env:FIREBASE_PROJECT_ID = "univillage-503009"
+node scripts/update-admin-user.cjs
+```
+
+Firebase Admin authentication must also be available. Use Application Default
+Credentials, or set both `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PRIVATE_KEY`.
+Use the requested temporary password as `ADMIN_PASSWORD`, then change it to a
+strong unique password after first sign-in. Sign in again so Firebase issues a
+token containing the new admin claim.
+
 ## Testing the System
 
 ### 1. Test Login Flow

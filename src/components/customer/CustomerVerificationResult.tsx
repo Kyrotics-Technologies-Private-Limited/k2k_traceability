@@ -172,14 +172,14 @@ export function CustomerVerificationResult({
               <div className="flex-shrink-0 pt-1">
                 {packetDetails.testReport ? (
                   <Button
-                    className="w-full bg-[#2C5325] hover:bg-[#1E3B19] text-white py-4 sm:py-5 px-3 sm:px-4 rounded-lg text-xs sm:text-sm md:text-base font-bold shadow-sm transition-all active:scale-[0.98] flex items-center justify-between gap-2"
+                    className="relative w-full bg-[#2C5325] hover:bg-[#1E3B19] text-white py-4 sm:py-5 px-3 sm:px-4 rounded-lg text-xs sm:text-sm md:text-base font-bold shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                     onClick={() => window.open(packetDetails.testReport!, "_blank")}
                   >
                     <div className="flex items-center gap-2 sm:gap-3">
                       <FileText className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white/90 flex-shrink-0" strokeWidth={2.25} />
                       <span>View Batch Lab Test Report</span>
                     </div>
-                    <svg className="w-4 h-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="absolute right-3 w-4 h-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                   </Button>

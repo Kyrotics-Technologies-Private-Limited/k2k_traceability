@@ -23,7 +23,8 @@ export async function POST(
   });
 
   if (!result.success) {
-    return NextResponse.json({ error: result.message }, { status: 400 });
+    console.error("Failed to update batch test report:", result.message);
+    return NextResponse.json({ error: result.message }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, reportUrl: result.data?.reportUrl });

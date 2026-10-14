@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -37,11 +38,11 @@ export function UploadTestReportDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="py-4 space-y-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <DialogDescription className="py-4">
             {hasExistingReport
               ? "A report is already uploaded. Selecting a new file will overwrite the existing one."
               : "Select a PDF or image file for the lab test report for this batch."}
-          </p>
+          </DialogDescription>
           <label
             htmlFor="report-upload"
             className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-green-300 dark:border-green-700 rounded-lg cursor-pointer bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"

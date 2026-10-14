@@ -72,4 +72,20 @@ The app is now working with fallback behavior:
 2. **For Production**: Set up the service account credentials as described above
 3. **For Testing**: You can test all features except detailed user name display
 
+## Firebase Storage Bucket
+
+Test report uploads use the bucket named by `FIREBASE_STORAGE_BUCKET` on the
+server. The bucket must already exist in the same Firebase/Google Cloud project
+as `FIREBASE_PROJECT_ID`; setting an environment variable does not create it.
+Create or confirm the bucket in Firebase Console → Storage, then use its exact
+bucket name (without `gs://`) in the environment.
+
+The shared bucket used by K2K is `univillage-503009.firebasestorage.app`.
+This project uses that same bucket in `.env` and `.env.production`. The Cloud
+Run deploy script also defaults to it; set `FIREBASE_STORAGE_BUCKET` before
+running `./deploy.sh` only if you intentionally need to override it. A `404`
+stating that the bucket does not exist means the bucket has not been created in
+the Firebase project or the name differs from the bucket shown in Firebase
+Console.
+
 The error is now handled gracefully and won't crash your application!
