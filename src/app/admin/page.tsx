@@ -3,33 +3,19 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  adminDeleteProduct,
-  adminFetchProducts,
-} from "@/lib/admin-client";
+import { adminFetchProducts } from "@/lib/admin-client";
 import type { ProductCategory } from "@/lib/admin-data/types";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
-import { Package, Trash2 } from "lucide-react";
+import { Package } from "lucide-react";
 import Loader from "@/components/common/Loader";
 
 export default function AdminPanel() {
   const [productCategories, setProductCategories] = useState<ProductCategory[]>(
     []
   );
-  const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<ProductCategory | null>(null);
   
   const { user, userRole, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -58,8 +44,8 @@ export default function AdminPanel() {
     }
   }, [user, userRole, authLoading, router]);
 
-  // Show loading while checking auth, fetching data, or submitting
-  if (authLoading || dataLoading || loading) {
+  // Show loading while checking auth or fetching data
+  if (authLoading || dataLoading) {
     return <Loader />;
   }
 
@@ -67,37 +53,6 @@ export default function AdminPanel() {
   if (!user || userRole !== 'admin') {
     return null;
   }
-
-
-
-  const handleDeleteClick = (e: React.MouseEvent, category: ProductCategory) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setProductToDelete(category);
-    setIsDeleteConfirmOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!productToDelete || !user) return;
-    setLoading(true);
-    try {
-      const result = await adminDeleteProduct(user, productToDelete.id);
-      if (result.ok) {
-        toast.success(result.message || "Product deleted successfully");
-        const categories = await adminFetchProducts(user);
-        setProductCategories(categories);
-        setIsDeleteConfirmOpen(false);
-        setProductToDelete(null);
-      } else {
-        toast.error("Failed to delete product");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="h-[calc(100vh-100px)] max-w-7xl mx-auto pt-10 flex flex-col items-center">
@@ -169,27 +124,6 @@ export default function AdminPanel() {
           </div>
         </div>
       </div>
-
-      {/* Dialog for deleting a product */}
-      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Product</DialogTitle>
-          </DialogHeader>
-          <div className="p-4 text-sm text-gray-700">
-            <p>Are you sure you want to delete <strong>{productToDelete?.productName}</strong>?</p>
-            <p className="mt-2 text-xs text-red-600 font-semibold">This action cannot be undone. The product will be permanently removed. It will fail if there are active batches associated with this product.</p>
-          </div>
-          <DialogFooter>
-            <Button variant="destructive" onClick={handleDeleteConfirm} disabled={loading}>
-              {loading ? "Deleting..." : "Delete"}
-            </Button>
-            <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
