@@ -38,6 +38,8 @@ export function useCustomerSerialDetails(serialNo: string) {
             batchNo?: string;
             testReport?: string;
             refractometerReport?: string;
+            manufacturingDate?: string;
+            expiryDate?: string;
           };
 
           setPacketDetails({
@@ -48,6 +50,8 @@ export function useCustomerSerialDetails(serialNo: string) {
             batchNo: details.batchNo ?? "",
             testReport: details.testReport ?? "",
             refractometerReport: details.refractometerReport ?? "",
+            manufacturingDate: details.manufacturingDate,
+            expiryDate: details.expiryDate,
           });
           return;
         }

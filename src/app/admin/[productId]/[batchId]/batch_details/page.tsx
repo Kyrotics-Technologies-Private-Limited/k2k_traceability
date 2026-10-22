@@ -9,6 +9,7 @@ import { BatchDetailsHeader } from "@/components/admin/batch/BatchDetailsHeader"
 import { BatchStatsCards } from "@/components/admin/batch/BatchStatsCards";
 import { DeleteBatchDialog } from "@/components/admin/batch/DeleteBatchDialog";
 import { GeneratePacketsDialog } from "@/components/admin/batch/GeneratePacketsDialog";
+import { ManufacturingDateDialog } from "@/components/admin/batch/ManufacturingDateDialog";
 import { PacketInventoryTable } from "@/components/admin/batch/PacketInventoryTable";
 import { RefractometerIndexDialog } from "@/components/admin/batch/RefractometerIndexDialog";
 import { UploadTestReportDialog } from "@/components/admin/batch/UploadTestReportDialog";
@@ -46,11 +47,15 @@ export default function BatchDetailsPage({ params }: Props) {
           batchDetails={batch.batchDetails}
           onViewReport={batch.openTestReport}
           onUploadReport={batch.openUploadDialog}
+          onOpenMfgDate={() => batch.setOpenMfgDateDialog(true)}
           onExportExcel={batch.handleExportToExcel}
           onDeleteBatch={() => batch.setOpenDeleteDialog(true)}
         />
 
-        <BatchStatsCards batchDetails={batch.batchDetails} />
+        <BatchStatsCards
+          batchDetails={batch.batchDetails}
+          onOpenMfgDate={() => batch.setOpenMfgDateDialog(true)}
+        />
 
         <PacketInventoryTable
           packets={batch.filteredAndSortedPackets}
@@ -103,6 +108,14 @@ export default function BatchDetailsPage({ params }: Props) {
           onFileChange={batch.setUploadReportFile}
           onUpload={batch.handleUploadReport}
           isUploading={batch.isUploadingReport}
+        />
+
+        <ManufacturingDateDialog
+          open={batch.openMfgDateDialog}
+          onOpenChange={batch.setOpenMfgDateDialog}
+          initialDate={batch.batchDetails?.manufacturingDate}
+          onSave={batch.handleSaveMfgDate}
+          isSaving={batch.isSavingMfgDate}
         />
       </div>
     </div>

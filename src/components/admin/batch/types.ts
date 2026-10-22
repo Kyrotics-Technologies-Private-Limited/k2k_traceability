@@ -4,6 +4,8 @@ export interface BatchData {
   quantity?: number;
   batchNo?: string;
   testReport?: string;
+  manufacturingDate?: string;
+  expiryDate?: string;
 }
 
 export interface PacketDetails {

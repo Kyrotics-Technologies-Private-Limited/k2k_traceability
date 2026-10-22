@@ -124,9 +124,6 @@ export default function AdminPanel() {
                   <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Total Batches
                   </th>
-                  <th scope="col" className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-green-100 bg-white/90">
@@ -164,19 +161,6 @@ export default function AdminPanel() {
                       <span className="text-sm text-gray-600">
                         {category.batchCount ?? 0}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-9 px-3 border-gray-200 text-red-600 hover:text-red-700 hover:bg-red-50/50 flex items-center gap-1.5"
-                          onClick={(e) => handleDeleteClick(e, category)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Delete
-                        </Button>
-                      </div>
                     </td>
                   </tr>
                 ))}

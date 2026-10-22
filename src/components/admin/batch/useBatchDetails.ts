@@ -10,6 +10,7 @@ import {
   adminFetchPackets,
   adminFetchProduct,
   adminGeneratePackets,
+  adminUpdateBatchDetails,
   adminUpdateRefractometer,
   adminUploadTestReport,
 } from "@/lib/admin-client";
@@ -55,6 +56,8 @@ export function useBatchDetails({ user, productId, batchId }: UseBatchDetailsOpt
   const [openUploadReportDialog, setOpenUploadReportDialog] = useState(false);
   const [uploadReportFile, setUploadReportFile] = useState<File | null>(null);
   const [isUploadingReport, setIsUploadingReport] = useState(false);
+  const [openMfgDateDialog, setOpenMfgDateDialog] = useState(false);
+  const [isSavingMfgDate, setIsSavingMfgDate] = useState(false);
 
   const hasReports = useMemo(
     () => packetDetails.some((p) => hasRefractometerReport(p.refractometerReport)),
@@ -213,6 +216,24 @@ export function useBatchDetails({ user, productId, batchId }: UseBatchDetailsOpt
     }
   };
 
+  const handleSaveMfgDate = async (manufacturingDate: string) => {
+    if (!user) return;
+    setIsSavingMfgDate(true);
+    try {
+      await adminUpdateBatchDetails(user, productId, batchId, { manufacturingDate });
+      setBatchDetails((prev) => (prev ? { ...prev, manufacturingDate } : prev));
+      setOpenMfgDateDialog(false);
+      toast.success("Manufacturing date updated successfully");
+    } catch (error) {
+      console.error("Error updating manufacturing date:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update manufacturing date"
+      );
+    } finally {
+      setIsSavingMfgDate(false);
+    }
+  };
+
   const isPageBusy = dataLoading || isGenerating;
 
   return {
@@ -246,6 +267,10 @@ export function useBatchDetails({ user, productId, batchId }: UseBatchDetailsOpt
     uploadReportFile,
     setUploadReportFile,
     isUploadingReport,
+    openMfgDateDialog,
+    setOpenMfgDateDialog,
+    isSavingMfgDate,
+    handleSaveMfgDate,
     handleGeneratePacket,
     handleUploadReport,
     handleSort,

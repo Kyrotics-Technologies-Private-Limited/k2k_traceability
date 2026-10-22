@@ -164,3 +164,37 @@ export async function deleteBatch(
     };
   }
 }
+
+export async function updateBatchDetails(
+  productId: string,
+  batchId: string,
+  updates: { manufacturingDate?: string; expiryDate?: string }
+): Promise<ServiceResult> {
+  try {
+    const cleanUpdates: Record<string, string> = {};
+    if (typeof updates.manufacturingDate === "string") {
+      cleanUpdates.manufacturingDate = updates.manufacturingDate.trim();
+    }
+    if (typeof updates.expiryDate === "string") {
+      cleanUpdates.expiryDate = updates.expiryDate.trim();
+    }
+
+    if (Object.keys(cleanUpdates).length === 0) {
+      return { success: false, message: "No fields provided to update" };
+    }
+
+    await db()
+      .collection("productCategory")
+      .doc(productId)
+      .collection("batches")
+      .doc(batchId)
+      .set(cleanUpdates, { merge: true });
+
+    return { success: true, message: "Batch updated successfully" };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "An unknown error occurred",
+    };
+  }
+}

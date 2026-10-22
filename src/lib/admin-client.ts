@@ -125,6 +125,20 @@ export async function adminFetchBatch(
   return data.batch;
 }
 
+export async function adminUpdateBatchDetails(
+  user: User | null,
+  productId: string,
+  batchId: string,
+  updates: { manufacturingDate?: string; expiryDate?: string }
+): Promise<{ ok: true; message?: string }> {
+  const response = await fetch(`/api/admin/products/${productId}/batches/${batchId}`, {
+    method: "PATCH",
+    headers: await getAuthHeaders(user),
+    body: JSON.stringify(updates),
+  });
+  return parseResponse(response);
+}
+
 export async function adminDeleteBatch(
   user: User | null,
   productId: string,

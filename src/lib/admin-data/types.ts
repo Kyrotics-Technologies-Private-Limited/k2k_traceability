@@ -14,6 +14,8 @@ export interface AdminBatch {
   quantity?: number;
   limitQuantity?: number;
   testReport?: string;
+  manufacturingDate?: string;
+  expiryDate?: string;
 }
 
 export interface AdminPacket {

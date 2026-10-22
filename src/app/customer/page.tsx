@@ -4,11 +4,109 @@
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, AlertCircle } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+interface CodeSegmentInputProps {
+  id: string;
+  length: number;
+  value: string;
+  label: string;
+  sublabel: string;
+  isFocused: boolean;
+  onChange: (val: string) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onPaste?: (e: React.ClipboardEvent<HTMLInputElement>) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
+}
+
+function CodeSegmentInput({
+  id,
+  length,
+  value,
+  label,
+  sublabel,
+  isFocused,
+  onChange,
+  onKeyDown,
+  onPaste,
+  onFocus,
+  onBlur,
+}: CodeSegmentInputProps) {
+  const isFilled = value.length === length;
+
+  return (
+    <div className="flex flex-col items-center flex-1 min-w-0">
+      <div
+        className={cn(
+          "relative w-full flex items-center justify-center rounded-xl border-2 transition-all duration-200 cursor-text py-2.5 sm:py-3.5 px-1 shadow-sm select-none",
+          isFocused
+            ? "border-green-600 dark:border-green-500 ring-4 ring-green-500/15 bg-green-50/30 dark:bg-green-950/30 shadow-md scale-[1.02]"
+            : isFilled
+            ? "border-green-300 dark:border-green-800 bg-green-50/20 dark:bg-green-950/20"
+            : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-green-200 dark:hover:border-gray-700"
+        )}
+        onClick={() => document.getElementById(id)?.focus()}
+      >
+        <input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer text-base"
+          value={value}
+          maxLength={length}
+          onChange={(e) => {
+            const val = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+            onChange(val);
+          }}
+          onKeyDown={onKeyDown}
+          onPaste={onPaste}
+          onFocus={onFocus}
+          onBlur={onBlur}
+        />
+
+        {/* Visual Slots showing entered characters and _ for each number */}
+        <div className="flex items-center justify-center gap-1 sm:gap-1.5 font-mono select-none pointer-events-none">
+          {Array.from({ length }).map((_, i) => {
+            const char = value[i];
+            const isNextActive = isFocused && i === value.length;
+            return (
+              <span
+                key={i}
+                className={cn(
+                  "inline-flex items-center justify-center w-4 sm:w-6 text-center text-base sm:text-xl font-bold tracking-tight transition-all",
+                  char
+                    ? "text-gray-900 dark:text-gray-50"
+                    : isNextActive
+                    ? "text-green-600 dark:text-green-400 font-extrabold animate-pulse underline decoration-2 decoration-green-500 underline-offset-4"
+                    : "text-gray-400 dark:text-gray-500 font-semibold"
+                )}
+              >
+                {char || "_"}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-1.5 sm:mt-2 text-center">
+        <span className="block text-[11px] sm:text-xs font-semibold text-gray-800 dark:text-gray-200 leading-tight">
+          {label}
+        </span>
+        <span className="block text-[10px] sm:text-[11px] text-gray-400 dark:text-gray-500 font-medium leading-tight">
+          {sublabel}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 const CustomerSearchContent = () => {
   const router = useRouter();
@@ -18,12 +116,17 @@ const CustomerSearchContent = () => {
   const [part1, setPart1] = useState("");
   const [part2, setPart2] = useState("");
   const [part3, setPart3] = useState("");
+  const [focusedPart, setFocusedPart] = useState<number | null>(null);
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const text = e.clipboardData.getData("text").trim();
-    if (text.includes("-")) {
-      e.preventDefault();
-      const segments = text.split("-").map((s) => s.trim().toUpperCase());
+    e.preventDefault();
+    const raw = e.clipboardData.getData("text").trim().toUpperCase();
+    const clean = raw.replace(/[^A-Z0-9- ]/g, "");
+
+    // Hyphen or space separated: e.g. "001-00001-00001" or "001 00001 00001"
+    const splitRegex = /[- ]+/;
+    if (splitRegex.test(clean)) {
+      const segments = clean.split(splitRegex).filter(Boolean);
       if (segments[0]) setPart1(segments[0].slice(0, 3));
       if (segments[1]) setPart2(segments[1].slice(0, 5));
       if (segments[2]) setPart3(segments[2].slice(0, 5));
@@ -32,7 +135,40 @@ const CustomerSearchContent = () => {
       } else if (segments[1]) {
         document.getElementById("part3")?.focus();
       }
+      return;
     }
+
+    // Continuous string of 13 alphanumeric chars: e.g. "0010000100001"
+    const digitsOnly = clean.replace(/[^A-Z0-9]/g, "");
+    if (digitsOnly.length === 13) {
+      setPart1(digitsOnly.slice(0, 3));
+      setPart2(digitsOnly.slice(3, 8));
+      setPart3(digitsOnly.slice(8, 13));
+      document.getElementById("part3")?.focus();
+      return;
+    }
+
+    // Single chunk paste into whichever field had focus
+    const activeId = (e.target as HTMLElement).id;
+    if (activeId === "part1") {
+      const val = digitsOnly.slice(0, 3);
+      setPart1(val);
+      if (val.length === 3) document.getElementById("part2")?.focus();
+    } else if (activeId === "part2") {
+      const val = digitsOnly.slice(0, 5);
+      setPart2(val);
+      if (val.length === 5) document.getElementById("part3")?.focus();
+    } else if (activeId === "part3") {
+      const val = digitsOnly.slice(0, 5);
+      setPart3(val);
+    }
+  };
+
+  const handleClear = () => {
+    setPart1("");
+    setPart2("");
+    setPart3("");
+    document.getElementById("part1")?.focus();
   };
 
   const handleSearch = () => {
@@ -41,14 +177,21 @@ const CustomerSearchContent = () => {
     const p3 = part3.trim();
 
     if (!p1 && !p2 && !p3) {
-      alert("Please enter a product or serial number.");
+      alert("Please enter a serial number.");
       return;
     }
 
-    const segments = [p1, p2, p3].filter(Boolean);
+    // Normalize partial digits (e.g. "1" -> "001", "2" -> "00002") for optimal matching
+    const normP1 = p1 ? (p1.length < 3 && /^\d+$/.test(p1) ? p1.padStart(3, "0") : p1) : "";
+    const normP2 = p2 ? (p2.length < 5 && /^\d+$/.test(p2) ? p2.padStart(5, "0") : p2) : "";
+    const normP3 = p3 ? (p3.length < 5 && /^\d+$/.test(p3) ? p3.padStart(5, "0") : p3) : "";
+
+    const segments = [normP1, normP2, normP3].filter(Boolean);
     const resolvedQuery = segments.join("-");
     router.push(`/customer/${resolvedQuery}`);
   };
+
+  const hasAnyInput = Boolean(part1 || part2 || part3);
 
   return (
     <div className="min-h-screen relative overflow-x-hidden bg-gradient-to-b from-green-50/50 via-white to-green-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -120,70 +263,114 @@ const CustomerSearchContent = () => {
 
               {/* Search Input */}
               <div className="space-y-4">
-                <label className="block text-center text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
-                  Enter the Serial Number on your bottle / jar:
-                </label>
-                <div className="flex items-center justify-center gap-1.5 sm:gap-3 w-full">
-                  <Input
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    Enter the Serial Number on your bottle / jar:
+                  </label>
+                  {hasAnyInput && (
+                    <button
+                      type="button"
+                      onClick={handleClear}
+                      className="text-[11px] sm:text-xs text-gray-400 hover:text-red-500 transition-colors font-medium cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                {/* 3 Segments with _ slots */}
+                <div className="flex items-start justify-center gap-1.5 sm:gap-3 w-full">
+                  <CodeSegmentInput
                     id="part1"
-                    type="text"
-                    className="flex-1 max-w-[80px] sm:max-w-[100px] text-center py-3 sm:py-5 text-base sm:text-xl font-semibold border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600 uppercase px-1 rounded-lg"
+                    length={3}
                     value={part1}
-                    onPaste={handlePaste}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+                    label="Product"
+                    sublabel="3 digits"
+                    isFocused={focusedPart === 1}
+                    onChange={(val) => {
                       setPart1(val);
                       if (val.length === 3) document.getElementById("part2")?.focus();
                     }}
-                    placeholder="001"
-                    maxLength={3}
-                  />
-                  <span className="text-gray-400 font-bold text-lg sm:text-2xl select-none">-</span>
-                  <Input
-                    id="part2"
-                    type="text"
-                    className="flex-1 max-w-[105px] sm:max-w-[130px] text-center py-3 sm:py-5 text-base sm:text-xl font-semibold border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600 uppercase px-1 rounded-lg"
-                    value={part2}
+                    onFocus={() => setFocusedPart(1)}
+                    onBlur={() => setFocusedPart(null)}
                     onPaste={handlePaste}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleSearch();
+                      } else if (e.key === "ArrowRight" && e.currentTarget.selectionStart === part1.length) {
+                        document.getElementById("part2")?.focus();
+                      }
+                    }}
+                  />
+
+              
+
+                  <CodeSegmentInput
+                    id="part2"
+                    length={5}
+                    value={part2}
+                    label="Batch"
+                    sublabel="5 digits"
+                    isFocused={focusedPart === 2}
+                    onChange={(val) => {
                       setPart2(val);
                       if (val.length === 5) document.getElementById("part3")?.focus();
                     }}
+                    onFocus={() => setFocusedPart(2)}
+                    onBlur={() => setFocusedPart(null)}
+                    onPaste={handlePaste}
                     onKeyDown={(e) => {
                       if (e.key === "Backspace" && !part2) {
                         document.getElementById("part1")?.focus();
+                      } else if (e.key === "ArrowLeft" && e.currentTarget.selectionStart === 0) {
+                        document.getElementById("part1")?.focus();
+                      } else if (e.key === "ArrowRight" && e.currentTarget.selectionStart === part2.length) {
+                        document.getElementById("part3")?.focus();
+                      } else if (e.key === "Enter") {
+                        handleSearch();
                       }
                     }}
-                    placeholder="00001"
-                    maxLength={5}
                   />
-                  <span className="text-gray-400 font-bold text-lg sm:text-2xl select-none">-</span>
-                  <Input
+
+
+                  <CodeSegmentInput
                     id="part3"
-                    type="text"
-                    className="flex-1 max-w-[105px] sm:max-w-[130px] text-center py-3 sm:py-5 text-base sm:text-xl font-semibold border-2 border-green-100 dark:border-green-800 focus:border-green-500 dark:focus:border-green-600 uppercase px-1 rounded-lg"
+                    length={5}
                     value={part3}
-                    onPaste={handlePaste}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+                    label="Bottle"
+                    sublabel="5 digits"
+                    isFocused={focusedPart === 3}
+                    onChange={(val) => {
                       setPart3(val);
                     }}
+                    onFocus={() => setFocusedPart(3)}
+                    onBlur={() => setFocusedPart(null)}
+                    onPaste={handlePaste}
                     onKeyDown={(e) => {
                       if (e.key === "Backspace" && !part3) {
+                        document.getElementById("part2")?.focus();
+                      } else if (e.key === "ArrowLeft" && e.currentTarget.selectionStart === 0) {
                         document.getElementById("part2")?.focus();
                       } else if (e.key === "Enter") {
                         handleSearch();
                       }
                     }}
-                    placeholder="00001"
-                    maxLength={5}
                   />
+                </div>
+
+                {/* Helper hint */}
+                <div className="flex flex-col items-center gap-1 text-center pt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Format: <span className="font-mono font-semibold text-green-700 dark:text-green-300">001-00001-00001</span> (3 - 5 - 5 digits)
+                  </p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500">
+                    Located above or near the QR code on your product
+                  </p>
                 </div>
                 
                 <Button 
                   onClick={handleSearch}
-                  className="w-full py-4 sm:py-6 text-base sm:text-lg font-bold bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white transition-all shadow-md active:scale-[0.99] rounded-lg mt-2"
+                  className="w-full py-4 sm:py-6 text-base sm:text-lg font-bold bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white transition-all shadow-md active:scale-[0.99] rounded-lg mt-2 cursor-pointer"
                 >
                   Verify Product
                 </Button>

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Calendar,
   Download,
   FileText,
   Layers,
@@ -15,6 +16,7 @@ interface Props {
   batchDetails: BatchData | null;
   onViewReport: () => void;
   onUploadReport: () => void;
+  onOpenMfgDate: () => void;
   onExportExcel: () => void;
   onDeleteBatch: () => void;
 }
@@ -24,6 +26,7 @@ export function BatchDetailsHeader({
   batchDetails,
   onViewReport,
   onUploadReport,
+  onOpenMfgDate,
   onExportExcel,
   onDeleteBatch,
 }: Props) {
@@ -69,6 +72,14 @@ export function BatchDetailsHeader({
                 Upload Lab Report
               </Button>
             )}
+            <Button
+              variant="outline"
+              onClick={onOpenMfgDate}
+              className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+            >
+              <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              {batchDetails?.manufacturingDate ? "Edit Mfg Date" : "Add Mfg Date"}
+            </Button>
             <Button
               onClick={onExportExcel}
               className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
