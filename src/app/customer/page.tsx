@@ -15,7 +15,7 @@ interface CodeSegmentInputProps {
   length: number;
   value: string;
   label: string;
-  sublabel: string;
+  sublabel?: string;
   isFocused: boolean;
   onChange: (val: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -29,7 +29,7 @@ function CodeSegmentInput({
   length,
   value,
   label,
-  sublabel,
+  // sublabel,
   isFocused,
   onChange,
   onKeyDown,
@@ -100,9 +100,9 @@ function CodeSegmentInput({
         <span className="block text-[11px] sm:text-xs font-semibold text-gray-800 dark:text-gray-200 leading-tight">
           {label}
         </span>
-        <span className="block text-[10px] sm:text-[11px] text-gray-400 dark:text-gray-500 font-medium leading-tight">
+        {/* <span className="block text-[10px] sm:text-[11px] text-gray-400 dark:text-gray-500 font-medium leading-tight">
           {sublabel}
-        </span>
+        </span> */}
       </div>
     </div>
   );
@@ -195,7 +195,7 @@ const CustomerSearchContent = () => {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden bg-gradient-to-b from-green-50/50 via-white to-green-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16 relative z-10 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16 relative z-10 max-w-6xl">
         <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-12">
           <div className="flex justify-center mb-4 sm:mb-6">
             <Link href="/" className="cursor-pointer inline-block">
@@ -232,7 +232,8 @@ const CustomerSearchContent = () => {
           )}
         </div>
 
-        <Card className="w-full max-w-xl mx-auto backdrop-blur-sm bg-white/95 dark:bg-gray-900/90 shadow-md border border-gray-100 dark:border-gray-800">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+        <Card className="order-1 lg:order-2 w-full backdrop-blur-sm bg-white/95 dark:bg-gray-900/90 shadow-md border border-gray-100 dark:border-gray-800">
           <CardContent className="p-4 sm:p-6 md:p-8">
             <div className="grid gap-6 sm:gap-8">
               {/* Features */}
@@ -249,7 +250,7 @@ const CustomerSearchContent = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <p className="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight">Batch Reports</p>
+                  <p className="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight">Purity Report</p>
                 </div>
                 <div className="text-center p-2 rounded-lg bg-green-50/50 dark:bg-green-950/20">
                   <div className="bg-green-100 dark:bg-green-800/50 p-2 sm:p-3 rounded-full w-9 h-9 sm:w-11 sm:h-11 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center">
@@ -257,15 +258,15 @@ const CustomerSearchContent = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                     </svg>
                   </div>
-                  <p className="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight">Quality Analysis</p>
+                  <p className="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight">Lab Report</p>
                 </div>
               </div>
 
               {/* Search Input */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    Enter the Serial Number on your bottle / jar:
+                  <label className="block text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-bold">
+                    Enter the Bottle Number/Jar Number Printed on your Bottle/Jar:
                   </label>
                   {hasAnyInput && (
                     <button
@@ -285,7 +286,7 @@ const CustomerSearchContent = () => {
                     length={3}
                     value={part1}
                     label="Product"
-                    sublabel="3 digits"
+                    // sublabel="3 digits"
                     isFocused={focusedPart === 1}
                     onChange={(val) => {
                       setPart1(val);
@@ -310,7 +311,7 @@ const CustomerSearchContent = () => {
                     length={5}
                     value={part2}
                     label="Batch"
-                    sublabel="5 digits"
+                    // sublabel="5 digits"
                     isFocused={focusedPart === 2}
                     onChange={(val) => {
                       setPart2(val);
@@ -338,7 +339,7 @@ const CustomerSearchContent = () => {
                     length={5}
                     value={part3}
                     label="Bottle"
-                    sublabel="5 digits"
+                    // sublabel="5 digits"
                     isFocused={focusedPart === 3}
                     onChange={(val) => {
                       setPart3(val);
@@ -359,14 +360,14 @@ const CustomerSearchContent = () => {
                 </div>
 
                 {/* Helper hint */}
-                <div className="flex flex-col items-center gap-1 text-center pt-1">
+                {/* <div className="flex flex-col items-center gap-1 text-center pt-1">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Format: <span className="font-mono font-semibold text-green-700 dark:text-green-300">001-00001-00001</span> (3 - 5 - 5 digits)
                   </p>
                   <p className="text-[11px] text-gray-400 dark:text-gray-500">
                     Located above or near the QR code on your product
                   </p>
-                </div>
+                </div> */}
                 
                 <Button 
                   onClick={handleSearch}
@@ -378,6 +379,96 @@ const CustomerSearchContent = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Where to find the Bottle Number Guide Card */}
+        <div className="order-2 lg:order-1 w-full bg-[#f4fbf5] dark:bg-green-950/20 border border-green-200/80 dark:border-green-800/40 rounded-2xl p-4 sm:p-5 shadow-sm">
+          <div className="flex items-start gap-3 mb-3 sm:mb-4">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-green-700 dark:bg-green-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 mt-0.5 shadow-sm">
+              ?
+            </div>
+            <div>
+              <h2 className="text-sm sm:text-base md:text-lg font-bold text-green-900 dark:text-green-100 leading-tight">
+                Where to find the Bottle Number?
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                The bottle number / jar number is printed on the back label of your product, near the MRP section, as shown in the image below.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative mt-2 grid grid-cols-2 items-start gap-2 sm:gap-4">
+            {/* Left: Ghee Jar */}
+            <div className="relative flex flex-col items-center">
+              <span className="mb-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-700 dark:bg-green-600 text-[11px] font-bold text-white shadow-sm">
+                1
+              </span>
+              <div className="w-full rounded-xl bg-white/80 dark:bg-gray-900/40 p-1.5 ring-1 ring-green-200/70 dark:ring-green-800/50">
+                <Image
+                  src="/images/ghee-jar.png"
+                  alt="Golden Ghee Jar showing label location"
+                  width={400}
+                  height={533}
+                  className="w-full h-[170px] sm:h-[210px] lg:h-[240px] object-contain drop-shadow-md"
+                  priority
+                />
+              </div>
+              <p className="mt-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-green-900 dark:text-green-100 leading-tight">
+                Back of your ghee jar or Mustard oil Bottle
+              </p>
+            </div>
+
+            {/* Connecting Curved Arrow */}
+            <div className="absolute left-[44%] top-[52%] -translate-y-1/2 w-[12%] pointer-events-none z-10 flex items-center justify-center">
+              <svg viewBox="0 0 100 60" fill="none" className="w-full h-auto drop-shadow-sm overflow-visible">
+                <defs>
+                  <marker
+                    id="red-arrowhead"
+                    markerWidth="8"
+                    markerHeight="8"
+                    refX="6"
+                    refY="4"
+                    orient="auto"
+                  >
+                    <polygon points="0 1, 8 4, 0 7" fill="#ef4444" />
+                  </marker>
+                </defs>
+                <path
+                  d="M 5 32 Q 45 45, 88 25"
+                  stroke="#ef4444"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  fill="none"
+                  markerEnd="url(#red-arrowhead)"
+                />
+              </svg>
+            </div>
+
+            {/* Right: Packaged Food Information Label */}
+            <div className="relative flex flex-col items-center">
+              <span className="mb-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-700 dark:bg-green-600 text-[11px] font-bold text-white shadow-sm">
+                2
+              </span>
+              <div className="w-full rounded-xl bg-white/80 dark:bg-gray-900/40 p-1.5 ring-1 ring-green-200/70 dark:ring-green-800/50">
+                <Image
+                  src="/images/food-label.png"
+                  alt="Bottle / Jar Number Label Guide"
+                  width={600}
+                  height={366}
+                  className="w-full h-[170px] sm:h-[210px] lg:h-[240px] object-contain drop-shadow-sm"
+                  priority
+                />
+              </div>
+              <p className="mt-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-green-900 dark:text-green-100 leading-tight">
+                Find JAR NO/BOTTLE NO near the MRP
+              </p>
+            </div>
+          </div>
+
+          {/* <p className="mt-3 sm:mt-4 text-center text-[11px] sm:text-xs text-gray-600 dark:text-gray-300">
+            Example: <span className="font-mono font-bold text-green-800 dark:text-green-200">001-00001-00505</span>
+          </p> */}
+        </div>
+        </div>
       </div>
     </div>
   );
