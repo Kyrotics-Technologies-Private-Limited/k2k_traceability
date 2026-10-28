@@ -185,7 +185,7 @@ async function main() {
   console.log("Product 002 is now configured with:");
   console.log(` - Product Name: "${standardName}"`);
   console.log(` - Batch Lab Report: "${b002Data.testReport || referenceTestReport}"`);
-  console.log(` - Test Parameter: Refractor meter test value`);
+  console.log(` - Test Parameter: Butyro-refractometer (BR) value at 40°C`);
   console.log(` - Observed Value: ${referenceObserved}`);
   console.log(` - Standard Range: 58.0 - 60.5 (STANDARD RANGE (Pure Mustard Oil))`);
 }

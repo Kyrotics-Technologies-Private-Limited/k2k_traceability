@@ -9,7 +9,7 @@ export function getPurityReportDetails(productName?: string): PurityReportInfo {
   const name = productName?.toLowerCase() || "";
   if (name.includes("mustard") || name.includes("musturd")) {
     return {
-      parameter: "Refractor meter test value",
+      parameter: "Butyro-refractometer (BR) value at 40°C",
       standardRange: "58.0 - 60.5",
       rangeLabel: "STANDARD RANGE (Pure Mustard Oil)",
       remarks: "Purity range: 58.0 - 60.5",
