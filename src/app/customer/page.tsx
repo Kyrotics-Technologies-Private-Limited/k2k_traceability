@@ -366,7 +366,7 @@ const CustomerSearchContent = () => {
                     onClick={handleSearch}
                     className="w-full py-4 sm:py-6 text-base sm:text-lg font-bold bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white transition-all shadow-md active:scale-[0.99] rounded-lg mt-2 cursor-pointer"
                   >
-                    Verify Product
+                    Verify Purity
                   </Button>
                 </div>
               </div>
