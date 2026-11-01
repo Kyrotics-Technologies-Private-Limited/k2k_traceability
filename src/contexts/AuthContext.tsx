@@ -97,19 +97,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         phoneNumber: loggedInUser.phoneNumber,
       }, token);
 
-      try {
-        await fetch('/api/auth/set-claims', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ uid: loggedInUser.uid }),
-        });
-        await loggedInUser.getIdToken(true);
-      } catch (claimErr) {
-        console.warn('[auth] Custom claim stamping failed:', claimErr);
+      const claimsResponse = await fetch('/api/auth/set-claims', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ uid: loggedInUser.uid }),
+      });
+
+      if (!claimsResponse.ok) {
+        throw new Error(`Failed to sync admin claims: ${claimsResponse.status}`);
       }
+
+      await loggedInUser.getIdToken(true);
 
       const tokenResult = await loggedInUser.getIdTokenResult();
       const resolvedRole = tokenResult.claims.role as string | undefined;
@@ -158,19 +159,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         phoneNumber: result.user.phoneNumber,
       }, token);
 
-      try {
-        await fetch('/api/auth/set-claims', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ uid: result.user.uid }),
-        });
-        await result.user.getIdToken(true);
-      } catch (claimErr) {
-        console.warn('[auth] OTP claims stamp failed:', claimErr);
+      const claimsResponse = await fetch('/api/auth/set-claims', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ uid: result.user.uid }),
+      });
+
+      if (!claimsResponse.ok) {
+        throw new Error(`Failed to sync admin claims: ${claimsResponse.status}`);
       }
+
+      await result.user.getIdToken(true);
 
       const tokenResult = await result.user.getIdTokenResult();
       const resolvedRole = tokenResult.claims.role as 'admin' | 'customer' | undefined;
