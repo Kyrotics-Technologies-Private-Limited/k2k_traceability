@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export interface CustomerPacketDetails {
+  bottleNo?: string;
   productName: string;
   productDetails: string;
   description?: string;
@@ -31,6 +32,7 @@ export function useCustomerSerialDetails(serialNo: string) {
         if (apiResponse.ok) {
           const body = await apiResponse.json();
           const details = body.data as {
+            bottleNo?: string;
             productName?: string;
             productDetails?: string;
             description?: string;
@@ -43,6 +45,7 @@ export function useCustomerSerialDetails(serialNo: string) {
           };
 
           setPacketDetails({
+            bottleNo: details.bottleNo,
             productName: details.productName ?? "",
             productDetails: details.productDetails ?? "",
             description: details.description,

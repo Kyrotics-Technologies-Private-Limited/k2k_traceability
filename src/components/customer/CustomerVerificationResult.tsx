@@ -6,7 +6,7 @@ import { ArrowLeft, FileText, FlaskConical, Leaf, ShieldCheck, TestTube2 } from 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import type { CustomerPacketDetails } from "./useCustomerSerialDetails";
-import { getPurityReportDetails } from "./purity-report";
+import { getPurityReportDetails, getCustomerRefractometerValue } from "./purity-report";
 
 interface CustomerVerificationResultProps {
   serialNo: string;
@@ -18,7 +18,13 @@ export function CustomerVerificationResult({
   packetDetails,
 }: CustomerVerificationResultProps) {
   const router = useRouter();
-  const purityInfo = getPurityReportDetails(packetDetails.productName);
+  const effectiveBottleNo = packetDetails.bottleNo || serialNo;
+  const purityInfo = getPurityReportDetails(packetDetails.productName, effectiveBottleNo);
+  const observedRefractometer = getCustomerRefractometerValue({
+    refractometerReport: packetDetails.refractometerReport,
+    bottleNo: effectiveBottleNo,
+    productName: packetDetails.productName,
+  });
   const qualityRemarks = [
    
     "Within the standard purity range",
@@ -94,7 +100,7 @@ export function CustomerVerificationResult({
                   </div>
                   <div className="pt-1 sm:pt-0 flex flex-wrap gap-x-1.5">
                     <span className="font-semibold text-gray-900">Bottle number:</span>{" "}
-                    <span className="font-normal text-gray-700">{serialNo}</span>
+                    <span className="font-normal text-gray-700">{effectiveBottleNo}</span>
                   </div>
                   <div className="pt-1 sm:pt-0 flex flex-wrap gap-x-1.5">
                     <span className="font-semibold text-gray-900">Date of Manufacturing:</span>{" "}
@@ -141,9 +147,7 @@ export function CustomerVerificationResult({
                           </td>
                           <td className="py-2.5 sm:py-3 px-2 sm:px-3 text-center border-r border-[#2c5325]/15">
                             <span className="inline-block px-2 sm:px-2.5 py-0.5 bg-[#FEF08A] text-gray-900 font-semibold rounded text-xs sm:text-sm border border-[#fcee7e] min-w-[40px]">
-                              {packetDetails.refractometerReport && packetDetails.refractometerReport !== "N/A"
-                                ? packetDetails.refractometerReport
-                                : "2.8"}
+                              {observedRefractometer}
                             </span>
                           </td>
                           <td className="py-2.5 sm:py-3 px-2 sm:px-3 text-center text-xs sm:text-sm font-normal text-gray-700 border-r border-[#2c5325]/15">

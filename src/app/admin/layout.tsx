@@ -22,11 +22,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const pathname = usePathname();
 
-
+  // roleResolved: auth check is done AND the role has been populated.
+  // If the user is logged in but userRole is still null it means the JWT
+  // token / role fetch is still in-flight — treat this as still loading.
+  const roleResolved = !loading && !(user !== null && userRole === null);
 
   useEffect(() => {
 
-    if (!loading && (!user || userRole !== "admin")) {
+    if (roleResolved && (!user || userRole !== "admin")) {
 
       toast.error("Access denied. Admin authentication required.");
 
@@ -34,11 +37,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     }
 
-  }, [user, userRole, loading, pathname, router]);
+  }, [user, userRole, roleResolved, pathname, router]);
 
 
 
-  if (loading) {
+  if (!roleResolved) {
 
     return <Loader />;
 

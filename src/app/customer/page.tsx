@@ -3,7 +3,7 @@
 
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ShieldCheck, AlertCircle } from "lucide-react";
+import { ShieldCheck, AlertCircle, CheckCircle2, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
@@ -246,17 +246,13 @@ const CustomerSearchContent = () => {
                   </div>
                   <div className="text-center p-2 rounded-lg bg-green-50/50 dark:bg-green-950/20">
                     <div className="bg-green-100 dark:bg-green-800/50 p-2 sm:p-3 rounded-full w-9 h-9 sm:w-11 sm:h-11 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center">
-                      <svg className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
                     </div>
                     <p className="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight">Purity Report</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-green-50/50 dark:bg-green-950/20">
                     <div className="bg-green-100 dark:bg-green-800/50 p-2 sm:p-3 rounded-full w-9 h-9 sm:w-11 sm:h-11 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center">
-                      <svg className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                      </svg>
+                      <FlaskConical className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
                     </div>
                     <p className="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight">Lab Report</p>
                   </div>

@@ -51,6 +51,49 @@ async function resolveBottleIndexDoc(
   return null;
 }
 
+function resolveCustomerDefaultRefractometer(
+  rawReport: unknown,
+  bottleNo: string,
+  productName?: unknown
+): string | undefined {
+  const reportStr = typeof rawReport === "string" ? rawReport.trim() : "";
+  if (
+    reportStr &&
+    reportStr.toUpperCase() !== "N/A" &&
+    reportStr.toUpperCase() !== "NA" &&
+    reportStr.toUpperCase() !== "NONE" &&
+    reportStr !== "-"
+  ) {
+    return reportStr;
+  }
+
+  const cleanBottle = bottleNo.trim();
+  const lowerName = typeof productName === "string" ? productName.toLowerCase() : "";
+
+  // 001 / Ghee -> 41.3
+  if (
+    cleanBottle.startsWith("001") ||
+    cleanBottle.startsWith("1-") ||
+    cleanBottle === "1" ||
+    lowerName.includes("ghee")
+  ) {
+    return "41.3";
+  }
+
+  // 002 / Mustard Oil -> 59.2
+  if (
+    cleanBottle.startsWith("002") ||
+    cleanBottle.startsWith("2-") ||
+    cleanBottle === "2" ||
+    lowerName.includes("mustard") ||
+    lowerName.includes("musturd")
+  ) {
+    return "59.2";
+  }
+
+  return reportStr || undefined;
+}
+
 /**
  * Resolve a bottle serial or product code via index or nested productCategory/batches/packets.
  */
@@ -112,7 +155,11 @@ export async function resolveCustomerBottleDetails(
           productImage: (product.productImage as string) || undefined,
           batchNo: (batchData.batchNo as string) || undefined,
           testReport: (batchData.testReport as string) || undefined,
-          refractometerReport: (packetData.refractometerReport as string) || undefined,
+          refractometerReport: resolveCustomerDefaultRefractometer(
+            packetData.refractometerReport,
+            cleanBottleNo,
+            product.productName
+          ),
           manufacturingDate: (batchData.manufacturingDate as string) || (batchData.createdAt as string) || undefined,
           expiryDate: (batchData.expiryDate as string) || undefined,
         };
@@ -256,7 +303,11 @@ export async function resolveCustomerBottleDetails(
     productImage: (product.productImage as string) || undefined,
     batchNo: resolvedBatchNo,
     testReport: (batchData.testReport as string) || undefined,
-    refractometerReport: (packetData.refractometerReport as string) || undefined,
+    refractometerReport: resolveCustomerDefaultRefractometer(
+      packetData.refractometerReport,
+      displayBottleNo,
+      product.productName
+    ),
     manufacturingDate: (batchData.manufacturingDate as string) || (batchData.createdAt as string) || undefined,
     expiryDate: (batchData.expiryDate as string) || undefined,
   };

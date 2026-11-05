@@ -34,18 +34,23 @@ export default function AdminPanel() {
     loadCategories();
   }, [user]);
 
-  // Check authentication
+  // Check authentication.
+  // Wait for BOTH authLoading to be false AND userRole to be resolved.
+  // When user is logged in but userRole is still null it means the token/role
+  // fetch is still in flight — do NOT redirect yet.
+  const roleResolved = !authLoading && !(user !== null && userRole === null);
+
   useEffect(() => {
-    if (!authLoading) {
+    if (roleResolved) {
       if (!user || userRole !== 'admin') {
         toast.error("Access denied. Admin authentication required.");
         router.push("/login");
       }
     }
-  }, [user, userRole, authLoading, router]);
+  }, [user, userRole, roleResolved, router]);
 
-  // Show loading while checking auth or fetching data
-  if (authLoading || dataLoading) {
+  // Show loading while checking auth, resolving role, or fetching data
+  if (!roleResolved || dataLoading) {
     return <Loader />;
   }
 
